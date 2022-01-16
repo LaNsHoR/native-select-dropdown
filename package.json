@@ -1,6 +1,6 @@
 {
   "name": "native-select-dropdown",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A select-dropdown to replace the vanilla select element and its options.",
   "main": "src/select-dropdown.js",
   "scripts": {
@@ -28,5 +28,13 @@
   "directories": {
     "test": "tests"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaNsHoR/native-select-dropdown.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LaNsHoR/native-select-dropdown/issues"
+  },
+  "homepage": "https://github.com/LaNsHoR/native-select-dropdown/#readme"
 }

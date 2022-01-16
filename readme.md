@@ -124,7 +124,7 @@ The above will set the value to `Dog` and will select the option with that value
 
 ```javascript
 const select_dropdown = document.getElementById('my-select-dropdown')
-select_dropdown.value = "this won't take effect because there's no option with this value or text content" // nothing happens
+select_dropdown.value = "this do nothing because there's no option with this value nor text content" // nothing happens
 ```
 
 A different way to set a value is adding a `selected` attribute to an option. Explained below.
@@ -216,7 +216,8 @@ This custom element uses a shadow DOM, so the CSS selectors you need to customiz
     padding: 10px;
     box-shadow: none;
     border: 2px solid #000000;
-    /* To make our dark version even more different, we add some space between the "button" and the "options" */
+    /* To make our dark version even more different, we add some space
+    between the "button" and the "options" */
     margin-top: 10px;
 }
 
