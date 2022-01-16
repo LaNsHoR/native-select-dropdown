@@ -124,7 +124,8 @@ The above will set the value to `Dog` and will select the option with that value
 
 ```javascript
 const select_dropdown = document.getElementById('my-select-dropdown')
-select_dropdown.value = "this do nothing because there's no option with this value nor text content" // nothing happens
+select_dropdown.value = `this line does nothing because there's no
+                         option with this value nor text content` // nothing happens
 ```
 
 A different way to set a value is adding a `selected` attribute to an option. Explained below.
@@ -137,11 +138,11 @@ Defines a new select-option element. Its direct parent needs to be a `select-dro
 
 - `placeholder`: This attribute marks the option as placeholder, so it will be selected by default and will have a empty value by default as well. It will also be rendered on the dropdown button when the option list is opened if the attribute `show-selected-on` has been set to `list`, as was explained above.
 - `hidden`: The option won't be visible in the option list. However it can be selected programmatically.
-- `disabled`: The option can't be selected, but it will appear visible in the option list.
-- `value`: Sets a specific value to the option. This value will be set to its select-dropdown parent when the option is selected.
-- `selected`: Says if the option is selected. This attribute is set/remove automatically when the user interacts with the dropdown selecting a new option. You can also add / remove programmatically this attribute to make an option selected. Only one option can be selected at a time, so adding a selected attribute to an option will remove the selected attribute of its siblings.
-- `label`: An alternative text/html that will be used in the dropdown "button" if this option is selected.
-- `button-content` (**INTERNAL / ADVANCED**): Every `select-dropdown` element creates automatically a new `select-option` child with the attribute `button-content`. This special select-option has the content of the select-dropdown button, in fact, you can treat it as the dropdown button itself in terms of content (in terms of styling, please, read the Styling section by the end of this document). As the dropdown button, it's not part of the option list and its content is updated when a new option is selected.
+- `disabled`: The option can't be selected by the user, but it will appear visible in the option list. Can be selected programatically.
+- `value`: Sets a specific value to the option. This will be the value of its select-dropdown parent when the option is selected.
+- `selected`: Says if the option is selected. This attribute is set/removed automatically when the user interacts with the dropdown selecting a new option. You can also add / remove programmatically this attribute to select an option from code (just an alternative to `select_dropdown.value = 'value'`). Only one option can be selected at a time, so adding a selected attribute to an option will remove the selected attribute of its siblings.
+- `label`: An alternative text/html that will be used in the dropdown "button" when the option is selected.
+- `button-content` (**INTERNAL / ADVANCED** attribute): Every `select-dropdown` element creates automatically a new `select-option` child with the attribute `button-content`. This special select-option has the content of the select-dropdown button, in fact, you can treat it as the dropdown button itself in terms of content (in terms of styling, please, read the styling section by the end of this document). As dropdown button content container, it's not part of the option list and its content is updated when a new option is selected.
 
     You don't need to worry or modify this special `button-content` option as it's managed automatically, however, you need to be aware of it if you are modifying the DOM tree programmatically, so for your html being:
 
@@ -159,7 +160,7 @@ Defines a new select-option element. Its direct parent needs to be a `select-dro
     console.log( select_dropdown.children )
     ```
 
-    You will get an HTMLCollection of size 3, the 2 options you have defined and the `button-content` one which is the dropdown button itself, the DOM will look like:
+    You will get an HTMLCollection of size 3, the 2 options you have defined and the `button-content` one which includes the content of the dropdown button itself, the DOM will look like:
 
     ```html
     <select-dropdown id="my-select-dropdown">
@@ -169,7 +170,9 @@ Defines a new select-option element. Its direct parent needs to be a `select-dro
     </select-dropdown>
     ```
 
-    The technical reason behind this special select-option is because when `show-selected-on` has the value `both` and the option list is opened, the content of the selected option needs to be rendered twice: one time in the option list itself and another in the dropdown button. At the moment is not possible render twice a single DOM node in a browser, so we need to transfer the content to another one, acting as clone. And the reason to no do that in the shadow DOM is because we want to keep the styling of your select-options intact in case you are using HTML and not only text in your select-options: doing this in the shadow DOM will leave your CSS out of the scope of where the dropdown button content is.
+    The technical reason behind this special select-option is because when `show-selected-on` has the value `both` and the option list is opened, the content of the selected option needs to be rendered twice: one time in the option list itself and another in the dropdown button. At the moment is not possible render twice a single DOM node in a browser, so we need to transfer the content to another one, acting as clone. And the reason to no do that in the shadow DOM is because we want to keep the styling of your select-options intact in case you are using HTML and not only text on them: doing this in the shadow DOM will leave your CSS out of the scope of where the dropdown button content is.
+
+    **TLDR**; `select-dropdown`'s will always create an extra `select-option` with the attribute `button-content`. You can and probably should ignore it, just be aware of its existence if you modify the DOM tree manually.
 
 # Styling
 
