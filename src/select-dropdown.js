@@ -404,7 +404,7 @@ class SelectDropdown extends HTMLElement {
     set value( value ) {
         const options = Array.from( this.querySelectorAll(':scope > ' + OPTION_TAG_NAME) )
         for( let option of options ) {
-            if( option.value == value )
+            if( option.value == value && ! option.hasAttribute('button-content') )
                 return this.set_option(option, true)
         }
     }

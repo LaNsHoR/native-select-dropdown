@@ -4,8 +4,8 @@ describe('Static render and parsing', () => {
   beforeEach( () => { cy.visit('/') })
 
   it('Render works ok.', () => {
-    cy.get('select-dropdown').should('have.lengthOf', 11)
-    cy.get('select-option').should('have.lengthOf', 90)
+    cy.get('select-dropdown').should('have.lengthOf', 12)
+    cy.get('select-option').should('have.lengthOf', 92)
   })
 
   it('Invalid children are discarded.', () => {
@@ -243,6 +243,15 @@ describe('Component API', () => {
       dropdown.value = 'This is an invalid value'
       test_id('sd2').should('have.value', 'Gentoo Penguin')
       test_id('sd2').find('*[selected]').should('have.text', 'Gentoo Penguin')
+    })
+  })
+
+  it('Set empty value, same as button-content', () => {
+    test_id('sd12').then( element => {
+      const dropdown = element.get(0)
+      dropdown.value = ''
+      test_id('sd12').should('have.value', '')
+      test_id('so12').should('have.attr', 'selected')
     })
   })
 })
