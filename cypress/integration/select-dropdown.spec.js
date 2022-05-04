@@ -254,6 +254,25 @@ describe('Component API', () => {
       test_id('so12').should('have.attr', 'selected')
     })
   })
+
+  it('Set option value as prop', () => {
+    test_id('so3').then( element => {
+      const option = element.get(0)
+      option.value = 'New Value as Prop'
+      test_id('so3').should('have.value', 'New Value as Prop')
+      test_id('so3').should('have.text', 'Lion')
+      test_id('sd2').find('select-option[slot="button_content"]').should('have.text', 'Gentoo Penguin')
+    })
+  })
+
+  it('Set option value (selected) as prop', () => {
+    test_id('so4').then( element => {
+      const option = element.get(0)
+      option.value = 'New Value as Prop'
+      test_id('so4').should('have.value', 'New Value as Prop')
+      test_id('sd2').should('have.value', 'New Value as Prop')
+    })
+  })
 })
 
 describe('Mouse interactions', () => {

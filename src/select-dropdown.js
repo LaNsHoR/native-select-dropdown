@@ -42,6 +42,10 @@ class SelectOption extends HTMLElement {
         this.parentElement.set_option( this )
     }
 
+    set value( x ) {
+        this.setAttribute('value', x)
+    }
+
     get value() {
         if( this.hasAttribute('value') )
             return this.getAttribute('value')
