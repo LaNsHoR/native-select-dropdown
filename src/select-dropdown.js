@@ -68,7 +68,7 @@ class SelectDropdown extends HTMLElement {
                     flex-direction: column;
                 }
 
-                :scope > button {
+                :host > button {
                     color: #568;
                     background: #fff;
                     border: 1px solid #e8eaed;
@@ -81,26 +81,26 @@ class SelectDropdown extends HTMLElement {
                     padding: 0;
                 }
 
-                :scope > button.opened {
+                :host > button.opened {
                     border-radius: 5px 5px 0 0;
                     border-bottom: 0;
                 }
 
-                :scope > button:focus-visible {
+                :host > button:focus-visible {
                     outline: 2px solid #68ceff;
                 }
 
-                :scope > button.opened:focus-visible {
+                :host > button.opened:focus-visible {
                     outline: 0
                 }
 
-                :scope > .after_button {
+                :host > .after_button {
                     height: 0;
                     overflow:visible;
                     z-index: 99999;
                 }
 
-                :scope > .after_button > .options {
+                :host > .after_button > .options {
                     color: #568;
                     background: #fff;
                     border: 1px solid #e8eaed;
@@ -112,7 +112,7 @@ class SelectDropdown extends HTMLElement {
                     box-shadow: 0 1px 3px -2px #9098A9;
                 }
 
-                :scope > .after_button > .options.opened {
+                :host > .after_button > .options.opened {
                     visibility: visible;
                     max-height: unset;
                 }
@@ -170,7 +170,7 @@ class SelectDropdown extends HTMLElement {
         this.attachShadow({ mode: 'open' })
         this.shadowRoot.appendChild( template.content.cloneNode(true) )
 
-        this.button = this.shadowRoot.querySelector(':scope > button')
+        this.button = this.shadowRoot.querySelector(':host > button')
         this.options = this.shadowRoot.querySelector('.options')
 
         this.addEventListener('keydown', event => this.keydown( event ) )
