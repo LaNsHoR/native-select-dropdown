@@ -391,7 +391,7 @@ class SelectDropdown extends HTMLElement {
             // setting selected attribute and dispatching a change event
             option.setAttribute('pre-selected', '')
             option.setAttribute('selected', '')
-            ! internal && this.dispatchEvent( new Event('change') )
+            ! internal && this.dispatchEvent( new Event('change', { bubbles: true, composed: true }) )
         }
 
         if( ! internal ) {

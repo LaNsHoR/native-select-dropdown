@@ -431,3 +431,19 @@ describe('Show selected modes', () => {
     })
   })
 })
+
+describe('Onchange Events', () => {
+  beforeEach( () => { cy.visit('/') })
+
+  it('Onchange event is fired', () => {
+    test_id('sd11').click().then( element => {
+      let current_event = false
+      const dropdown = element.get(0)
+      dropdown.onchange = event => ( current_event = event )
+      test_id('so11').click().then( _ => {
+        expect( current_event?.composed ).to.be.true
+        expect( current_event?.bubbles ).to.be.true
+      })
+    })
+  })
+})
