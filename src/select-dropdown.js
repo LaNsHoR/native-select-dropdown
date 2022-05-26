@@ -227,9 +227,7 @@ class SelectDropdown extends HTMLElement {
             if( ! node.hasAttribute('selected') )
                 return
 
-            this.selected_option = undefined
-            this.update_button()
-            this.dispatchEvent( new Event('change') )
+            this.check_selected()
         })
 
         nodes_added.forEach( node => {

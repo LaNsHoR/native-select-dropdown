@@ -74,6 +74,17 @@ describe('Static render and parsing', () => {
       dropdown.update_button()
     })
   })
+
+  it('Reset content with innerHTML adding a placeholder', () => {
+    test_id('sd1').then( element => {
+      const dropdown = element.get(0)
+      dropdown.innerHTML = '<select-option>A</select-option><select-option>B</select-option><select-option placeholder>C</select-option><select-option>D</select-option>'
+      test_id('sd1').find('select-option').should('have.lengthOf', 5)
+      test_id('sd1').should('have.value', '')
+      test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'C')
+      dropdown.update_button()
+    })
+  })
 })
 
 describe('Adding elements dynamically', () => {
@@ -222,7 +233,7 @@ describe('Remove options dynamically', () => {
       option.parentElement.removeChild(option)
       test_id('sd2').find('> *').should('have.lengthOf', count-1)
       test_id('sd2').should('have.value', '')
-      test_id('sd2').find('select-option[slot="button_content"]').should('have.text', '')
+      test_id('sd2').find('select-option[slot="button_content"]').should('have.text', 'Select an animal')
     })
   })
 })
