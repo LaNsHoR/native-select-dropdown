@@ -63,6 +63,17 @@ describe('Static render and parsing', () => {
     test_id('sd10').find('*[selected]').should('have.lengthOf', 1)
     test_id('sd11').find('*[selected]').should('have.lengthOf', 1)
   })
+
+  it('Reset content with innerHTML', () => {
+    test_id('sd1').then( element => {
+      const dropdown = element.get(0)
+      dropdown.innerHTML = '<select-option>A</select-option><select-option selected>B</select-option><select-option>C</select-option>'
+      test_id('sd1').find('select-option').should('have.lengthOf', 4)
+      test_id('sd1').should('have.value', 'B')
+      test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'B')
+      dropdown.update_button()
+    })
+  })
 })
 
 describe('Adding elements dynamically', () => {

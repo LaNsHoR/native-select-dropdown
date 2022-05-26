@@ -197,16 +197,20 @@ class SelectDropdown extends HTMLElement {
 
     connectedCallback() {
         // add button-content select-option
-        this.button_content = document.createElement(OPTION_TAG_NAME)
-        this.button_content.setAttribute('button-content', '')
-        this.button_content.setAttribute('slot', 'button_content')
-        this.appendChild(this.button_content)
+        this.create_button_content()
 
         //  add the default placeholder if we need to
         this.check_selected()
     }
 
     // ==[Change control]=======================================
+
+    create_button_content() {
+        this.button_content = document.createElement(OPTION_TAG_NAME)
+        this.button_content.setAttribute('button-content', '')
+        this.button_content.setAttribute('slot', 'button_content')
+        this.appendChild(this.button_content)
+    }
 
     update( mutations = [] ) {
         let nodes_added = []
@@ -234,6 +238,12 @@ class SelectDropdown extends HTMLElement {
 
             this.set_option( node, true )
         })
+
+        // check if button_content has been remove, if that's the case: regenerate
+        if( this.button_content?.parentElement != this ) {
+            this.create_button_content()
+            this.update_button()
+        }
     }
 
     check_selected() {
