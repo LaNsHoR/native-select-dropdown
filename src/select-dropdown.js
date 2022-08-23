@@ -2,8 +2,11 @@ const OPTION_TAG_NAME = 'select-option'
 const SELECT_TAG_NAME = 'select-dropdown'
 
 class SelectOption extends HTMLElement {
+    static get observedAttributes() { return  ['label', 'value', 'selected'] }
+
     constructor() {
         super()
+
         const observer = new MutationObserver( mutations => this.update(mutations) )
         observer.observe(this, { childList:true, subtree: true, attributes:true, attributeFilter: ['label', 'value', 'selected'] })
     }
@@ -25,7 +28,22 @@ class SelectOption extends HTMLElement {
             this.parentElement.check_selected()
     }
 
+    attributeChangedCallback( name, previous, current ) {
+        if( ! this.parentElement )
+            return
+
+        // case 1: it was selected and it's not now
+        if( name === 'selected' && previous === '' && current === null )
+            return this.parentElement.check_selected()
+        // case 2: label or value has changed or selected has been added
+        if( this.hasAttribute('selected') )
+            return this.parentElement.set_option( this, true )
+    }
+
     update( mutations ) {
+        if( ! this.parentElement )
+            return
+
         mutations.forEach( mutation => {
             // case 1: it was selected and it's not now
             if( mutation.target === this && mutation.attributeName == 'selected' && ! this.hasAttribute('selected') )
@@ -186,13 +204,6 @@ class SelectDropdown extends HTMLElement {
         observer.observe(this, { childList:true, subtree:false, attributes: false })
 
         this.close()
-    }
-
-    attributeChangeCallback( name, previous, current ) {
-        if( name != 'show-selected-on' )
-            return
-
-        this.update_button()
     }
 
     connectedCallback() {

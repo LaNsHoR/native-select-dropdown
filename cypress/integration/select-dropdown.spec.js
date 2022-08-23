@@ -109,9 +109,27 @@ describe('Adding elements dynamically', () => {
       option.innerHTML = '<b>injected!</b>'
       option.setAttribute('selected', '')
       dropdown.appendChild( option )
+      const value = dropdown.value
       test_id('sd1').find('select-option').should('have.lengthOf', 11)
       test_id('sd1').should('have.value', 'injected!')
       test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'injected!')
+      expect(value).to.eq('injected!')
+    })
+  })
+
+  it('Add option then select it', () => {
+    test_id('sd1').then( element => {
+      const dropdown = element.get(0)
+      const option = document.createElement('select-option')
+      option.innerHTML = '<b>injected!</b>'
+      dropdown.appendChild( option )
+      console.log('SET SELECTED')
+      option.setAttribute('selected', '')
+      const value = dropdown.value
+      test_id('sd1').find('select-option').should('have.lengthOf', 11)
+      test_id('sd1').should('have.value', 'injected!')
+      test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'injected!')
+      expect(value).to.eq('injected!')
     })
   })
 
@@ -465,6 +483,17 @@ describe('Onchange Events', () => {
       test_id('so11').click().then( _ => {
         expect( current_event?.composed ).to.be.true
         expect( current_event?.bubbles ).to.be.true
+      })
+    })
+  })
+
+  it('Onchange event is fired only once', () => {
+    test_id('sd11').click().then( element => {
+      let current_event = 0
+      const dropdown = element.get(0)
+      dropdown.onchange = event => ( current_event++ )
+      test_id('so11').click().then( _ => {
+        expect( current_event ).to.be.equal(1)
       })
     })
   })
