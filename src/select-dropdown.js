@@ -167,11 +167,11 @@ class SelectDropdown extends HTMLElement {
 
                 ::slotted(select-option[hidden]), ::slotted(select-option[hidden-internal]) {
                     visibility: hidden;
-                    height:0;
-                    padding-top:0;
-                    padding-bottom:0;
-                    border-top:0;
-                    border-bottom:0;
+                    height:0 !important;
+                    padding-top:0 !important;
+                    padding-bottom:0 !important;
+                    border-top:0 !important;
+                    border-bottom:0 !important;
                 }
             </style>
 
