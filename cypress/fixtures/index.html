@@ -218,7 +218,7 @@
                 </select-option>
             </select-dropdown>
 
-            <select-dropdown data-test-id="sd11" show-selected-on="list">
+            <select-dropdown id="my_dropdown" data-test-id="sd11" show-selected-on="list">
                 <select-option placeholder hidden>What's your favorite Arthur?</select-option>
                 <select-option>
                     <div><img src="https://i.postimg.cc/qBPgG8v4/arthur-1.jpg">Arthur 1</div>
@@ -243,6 +243,20 @@
             <select-dropdown data-test-id="sd12" show-selected-on="list">
                 <select-option data-test-id="so12" value>Empty</select-option>
             </select-dropdown>
+
+            <script>
+                const dropdown = document.getElementById('my_dropdown')
+                const parent = dropdown.parentElement
+                // check multiple connections and disconnections of the element
+                dropdown.remove()
+                parent.appendChild(dropdown)
+                dropdown.remove()
+                parent.appendChild(dropdown)
+                dropdown.remove()
+                parent.appendChild(dropdown)
+                dropdown.remove()
+                parent.appendChild(dropdown)
+            </script>
         </div>
     </body>
 </html>

@@ -217,6 +217,7 @@ class SelectDropdown extends HTMLElement {
     // ==[Change control]=======================================
 
     create_button_content() {
+        this.button_content?.remove()
         this.button_content = document.createElement(OPTION_TAG_NAME)
         this.button_content.setAttribute('button-content', '')
         this.button_content.setAttribute('slot', 'button_content')

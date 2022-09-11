@@ -497,4 +497,8 @@ describe('Onchange Events', () => {
       })
     })
   })
+
+  it('Connected and disconnected element work as expected', () => {
+    test_id('sd11').find('select-option[button-content]').should('have.lengthOf', 1)
+  })
 })
