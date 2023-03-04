@@ -1,5 +1,26 @@
+const ARROW_TAG_NAME  = 'select-arrow'
 const OPTION_TAG_NAME = 'select-option'
 const SELECT_TAG_NAME = 'select-dropdown'
+
+class SelectArrow extends HTMLElement {
+    constructor() {
+        super()
+
+        const observer = new MutationObserver( mutations => this.update(mutations) )
+        observer.observe(this, { childList:true, subtree: true, attributes:false })
+    }
+
+    connectedCallback() {
+        this.setAttribute('slot', 'arrow')
+
+        if( ! this.hasAttribute('position') )
+            this.setAttribute('position', 'right')
+    }
+
+    update() {
+        this.parentElement?.update_button()
+    }
+}
 
 class SelectOption extends HTMLElement {
     static get observedAttributes() { return  ['label', 'value', 'selected'] }
@@ -142,6 +163,14 @@ class SelectDropdown extends HTMLElement {
                     cursor: pointer;
                     white-space: nowrap;
                     font-family: 'Roboto', sans-serif;
+                    width: -webkit-fill-available;
+                }
+
+                ::slotted(OFFselect-option[button-content]) {
+                    display: flex;
+                    align-items: center;
+                    flex-grow: 1;
+                    white-space: pre-wrap;
                 }
 
                 ::slotted(select-option:last-child) {
@@ -173,10 +202,26 @@ class SelectDropdown extends HTMLElement {
                     border-top:0 !important;
                     border-bottom:0 !important;
                 }
+
+                button[part="button"] {
+                    display:flex;
+                    align-items: center;
+                }
+
+                ::slotted(select-arrow[position="left"]) {
+                    order: -1;
+                    margin-left: 12px;
+                }
+
+                ::slotted(select-arrow[position="right"]) {
+                    order: 1;
+                    margin-right: 12px;
+                }
             </style>
 
             <button part="button">
                 <slot name="button_content"></slot>
+                <slot name="arrow"></div>
             </button>
             <div class="after_button">
                 <div class="options" part="options">
@@ -249,7 +294,7 @@ class SelectDropdown extends HTMLElement {
             this.set_option( node, true )
         })
 
-        // check if button_content has been remove, if that's the case: regenerate
+        // check if button_content has been removed, if that's the case: regenerate
         if( this.button_content?.parentElement != this ) {
             this.create_button_content()
             this.update_button()
@@ -298,7 +343,9 @@ class SelectDropdown extends HTMLElement {
 
         // show the selected option in both, button and list
         this.button_content.innerHTML = this.selected_option?.getAttribute?.('label') || this.selected_option?.innerHTML || ''
-        this.button_content.className = this.selected_option?.className
+        this.button_content.className = ''
+        const option_classes = [ ...Object.values(this.selected_option?.className || {}) ]
+        this.button_content.classList.add( ...option_classes )
     }
 
     toggle_open( event ) {
@@ -436,3 +483,4 @@ class SelectDropdown extends HTMLElement {
 
 customElements.define(SELECT_TAG_NAME, SelectDropdown)
 customElements.define(OPTION_TAG_NAME, SelectOption)
+customElements.define(ARROW_TAG_NAME, SelectArrow)

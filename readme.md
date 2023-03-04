@@ -51,7 +51,7 @@ require('native-select-dropdown')
 
 # How to use it
 
-After the setup, you will have 2 new HTML tags available to use: `select-dropdown` and `select-option`. They are the analogous to the builtin tags `select` and `option` respectively.
+After the setup, you will have 3 new HTML tags available to use: `select-dropdown`, `select-option` and `select-arrow`. They first two are the analogous to the builtin tags `select` and `option` respectively, the last one allows you to define, optionally, an arrow icon, image, text or even a html block.
 
 ## `<select-dropdown>`
 
@@ -173,6 +173,46 @@ Defines a new select-option element. Its direct parent needs to be a `select-dro
     The technical reason behind this special select-option is because when `show-selected-on` has the value `both` and the option list is opened, the content of the selected option needs to be rendered twice: one time in the option list itself and another in the dropdown button. At the moment is not possible render twice a single DOM node in a browser, so we need to transfer the content to another one, acting as clone. And the reason to no do that in the shadow DOM is because we want to keep the styling of your select-options intact in case you are using HTML and not only text on them: doing this in the shadow DOM will leave your CSS out of the scope of where the dropdown button content is.
 
     **TLDR**; `select-dropdown`'s will always create an extra `select-option` with the attribute `button-content`. You can and probably should ignore it, just be aware of its existence if you modify the DOM tree manually.
+
+## `<select-arrow>`
+
+Defines an arrow. Its direct parent needs to be a `select-dropdown` element or it won't work.
+
+### Attributes
+
+- `position`: Where the arrow will be rendered as part of the button, valid values are `left` or `right`. If no position is defined, it defaults to `right`.
+
+As example, use:
+
+```html
+<select-dropdown data-test-id="sd15" show-selected-on="button">
+    <select-arrow position="right" class="grey"> 🡇 </select-arrow>
+    <select-option placeholder hidden>Select Something</select-option>
+    <select-option>One</select-option>
+    <select-option>Two</select-option>
+    <select-option>Three</select-option>
+</select-dropdown>
+```
+
+to render:
+
+[![arrow-right.png](https://i.postimg.cc/HLQ77T1r/arrow-right.png)](https://postimg.cc/nshLybzx)
+
+or:
+
+```html
+<select-dropdown data-test-id="sd15" show-selected-on="button">
+    <select-arrow position="left" class="grey"> 🡇 </select-arrow>
+    <select-option placeholder hidden>Select Something</select-option>
+    <select-option>One</select-option>
+    <select-option>Two</select-option>
+    <select-option>Three</select-option>
+</select-dropdown>
+```
+
+to render:
+
+[![arrow-left.png](https://i.postimg.cc/s2FhXvqF/arrow-left.png)](https://postimg.cc/87H5XPTw)
 
 # Styling
 

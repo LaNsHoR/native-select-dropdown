@@ -57,6 +57,15 @@
             .blue img {
                 border-radius: 50px;
             }
+
+            .red {
+                color: red;
+                background: pink;
+            }
+
+            .grey {
+                color: #92908c;
+            }
         </style>
     </head>
     <body style="overflow: hidden;">
@@ -242,6 +251,60 @@
 
             <select-dropdown data-test-id="sd12" show-selected-on="list">
                 <select-option data-test-id="so12" value>Empty</select-option>
+            </select-dropdown>
+
+            <select-dropdown data-test-id="sd13" show-selected-on="button">
+                <select-arrow> ↓<b>R</b>↓ </select-arrow>
+                <select-option placeholder hidden>Arrow Test</select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/qBPgG8v4/arthur-1.jpg">Arthur 1</div>
+                </select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/5N8yK6Xv/arthur-2.jpg">Arthur 2</div>
+                </select-option>
+                <select-option class="blue">
+                    <div><img src="https://i.postimg.cc/Gmr2WdDf/arthur-3.jpg">Arthur 3</div>
+                </select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/R0pZJtYr/arthur-4.jpg">Arthur 4</div>
+                </select-option>
+                <select-option data-test-id="so10">
+                    <div><img src="https://i.postimg.cc/rpwppjQC/arthur-5.jpg">Arthur 5</div>
+                </select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/3xBR7VCx/arthur-6.jpg">Arthur 6</div>
+                </select-option>
+            </select-dropdown>
+
+            <select-dropdown data-test-id="sd14" show-selected-on="button">
+                <select-arrow position="left" class="red"> ↓<b>L</b>↓ </select-arrow>
+                <select-option placeholder hidden>Arrow Test</select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/qBPgG8v4/arthur-1.jpg">Arthur 1</div>
+                </select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/5N8yK6Xv/arthur-2.jpg">Arthur 2</div>
+                </select-option>
+                <select-option class="blue">
+                    <div><img src="https://i.postimg.cc/Gmr2WdDf/arthur-3.jpg">Arthur 3</div>
+                </select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/R0pZJtYr/arthur-4.jpg">Arthur 4</div>
+                </select-option>
+                <select-option data-test-id="so10">
+                    <div><img src="https://i.postimg.cc/rpwppjQC/arthur-5.jpg">Arthur 5</div>
+                </select-option>
+                <select-option>
+                    <div><img src="https://i.postimg.cc/3xBR7VCx/arthur-6.jpg">Arthur 6</div>
+                </select-option>
+            </select-dropdown>
+
+            <select-dropdown data-test-id="sd15" show-selected-on="button">
+                <select-arrow position="right" class="grey"> 🡇 </select-arrow>
+                <select-option placeholder hidden>Select Something</select-option>
+                <select-option>One</select-option>
+                <select-option>Two</select-option>
+                <select-option>Three</select-option>
             </select-dropdown>
 
             <script>

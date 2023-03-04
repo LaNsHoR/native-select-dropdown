@@ -4,8 +4,9 @@ describe('Static render and parsing', () => {
   beforeEach( () => { cy.visit('/') })
 
   it('Render works ok.', () => {
-    cy.get('select-dropdown').should('have.lengthOf', 12)
-    cy.get('select-option').should('have.lengthOf', 92)
+    cy.get('select-dropdown').should('have.lengthOf', 15)
+    cy.get('select-option').should('have.lengthOf', 113)
+    cy.get('select-arrow').should('have.lengthOf', 3)
   })
 
   it('Invalid children are discarded.', () => {
@@ -85,6 +86,14 @@ describe('Static render and parsing', () => {
       dropdown.update_button()
     })
   })
+
+  it('Render arrow', () => {
+    test_id('sd13').then( element => {
+      const dropdown = element.get(0)
+      dropdown.innerHTML = '<select-arrow>ARROW</select-arrow><select-option>A</select-option><select-option>B</select-option><select-option placeholder>C</select-option><select-option>D</select-option>'
+      test_id('sd13').find('select-arrow').should('have.lengthOf', 1)
+    })
+  })
 })
 
 describe('Adding elements dynamically', () => {
@@ -144,6 +153,16 @@ describe('Adding elements dynamically', () => {
       test_id('sd1').find('select-option').should('have.lengthOf', 11)
       test_id('sd1').should('have.value', '5885')
       test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'injected!')
+    })
+  })
+
+  it('Add arrow', () => {
+    test_id('sd1').then( element => {
+      const dropdown = element.get(0)
+      const arrow = document.createElement('select-arrow')
+      arrow.innerHTML = 'arrow <b>injected!</b>'
+      dropdown.appendChild( arrow )
+      test_id('sd1').find('select-arrow').should('have.lengthOf', 1)
     })
   })
 })
