@@ -344,7 +344,7 @@ class SelectDropdown extends HTMLElement {
         // show the selected option in both, button and list
         this.button_content.innerHTML = this.selected_option?.getAttribute?.('label') || this.selected_option?.innerHTML || ''
         this.button_content.className = ''
-        const option_classes = [ ...Object.values(this.selected_option?.className || {}) ]
+        const option_classes = [ ... this.selected_option?.classList || [] ]
         this.button_content.classList.add( ...option_classes )
     }
 
