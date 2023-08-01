@@ -1,4 +1,4 @@
-const ARROW_TAG_NAME  = 'select-arrow'
+const ARROW_TAG_NAME = 'select-arrow'
 const OPTION_TAG_NAME = 'select-option'
 const SELECT_TAG_NAME = 'select-dropdown'
 
@@ -6,14 +6,14 @@ class SelectArrow extends HTMLElement {
     constructor() {
         super()
 
-        const observer = new MutationObserver( mutations => this.update(mutations) )
-        observer.observe(this, { childList:true, subtree: true, attributes:false })
+        const observer = new MutationObserver(mutations => this.update(mutations))
+        observer.observe(this, { childList: true, subtree: true, attributes: false })
     }
 
     connectedCallback() {
         this.setAttribute('slot', 'arrow')
 
-        if( ! this.hasAttribute('position') )
+        if (!this.hasAttribute('position'))
             this.setAttribute('position', 'right')
     }
 
@@ -23,72 +23,72 @@ class SelectArrow extends HTMLElement {
 }
 
 class SelectOption extends HTMLElement {
-    static get observedAttributes() { return  ['label', 'value', 'selected'] }
+    static get observedAttributes() { return ['label', 'value', 'selected'] }
 
     constructor() {
         super()
 
-        const observer = new MutationObserver( mutations => this.update(mutations) )
-        observer.observe(this, { childList:true, subtree: true, attributes:true, attributeFilter: ['label', 'value', 'selected'] })
+        const observer = new MutationObserver(mutations => this.update(mutations))
+        observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['label', 'value', 'selected'] })
     }
 
     connectedCallback() {
-        if( this.hasAttribute('button-content') )
+        if (this.hasAttribute('button-content'))
             return
 
-        this.addEventListener('mousedown', () => this.click() )
-        this.addEventListener('mouseover', () => this.parentElement.preselect( this ) )
-        this.addEventListener('keydown',   event => this.keydown(event) )
+        this.addEventListener('mousedown', () => this.click())
+        this.addEventListener('mouseover', () => this.parentElement.preselect(this))
+        this.addEventListener('keydown', event => this.keydown(event))
 
         this.setAttribute('slot', 'option')
 
-        if( this.hasAttribute('selected') )
-            this.parentElement.set_option( this, true )
+        if (this.hasAttribute('selected'))
+            this.parentElement.set_option(this, true)
 
-        if( this.hasAttribute('placeholder') )
+        if (this.hasAttribute('placeholder'))
             this.parentElement.check_selected()
     }
 
-    attributeChangedCallback( name, previous, current ) {
-        if( ! this.parentElement )
+    attributeChangedCallback(name, previous, current) {
+        if (!this.parentElement)
             return
 
         // case 1: it was selected and it's not now
-        if( name === 'selected' && previous === '' && current === null )
+        if (name === 'selected' && previous === '' && current === null)
             return this.parentElement.check_selected()
         // case 2: label or value has changed or selected has been added
-        if( this.hasAttribute('selected') )
-            return this.parentElement.set_option( this, true )
+        if (this.hasAttribute('selected'))
+            return this.parentElement.set_option(this, true)
     }
 
-    update( mutations ) {
-        if( ! this.parentElement )
+    update(mutations) {
+        if (!this.parentElement)
             return
 
-        mutations.forEach( mutation => {
+        mutations.forEach(mutation => {
             // case 1: it was selected and it's not now
-            if( mutation.target === this && mutation.attributeName == 'selected' && ! this.hasAttribute('selected') )
+            if (mutation.target === this && mutation.attributeName == 'selected' && !this.hasAttribute('selected'))
                 return this.parentElement.check_selected()
             // case 2: label or value has changed or selected has been added, or the content has changed
-            if( this.hasAttribute('selected') )
-                return this.parentElement.set_option( this, true )
+            if (this.hasAttribute('selected'))
+                return this.parentElement.set_option(this, true)
         })
     }
 
     click() {
-        if( this.hasAttribute('disabled') || this.hasAttribute('button-content') )
+        if (this.hasAttribute('disabled') || this.hasAttribute('button-content'))
             return
-        this.parentElement.set_option( this )
+        this.parentElement.set_option(this)
     }
 
-    set value( x ) {
+    set value(x) {
         this.setAttribute('value', x)
     }
 
     get value() {
-        if( this.hasAttribute('value') )
+        if (this.hasAttribute('value'))
             return this.getAttribute('value')
-        if( this.hasAttribute('placeholder') )
+        if (this.hasAttribute('placeholder'))
             return undefined
         return this.textContent
     }
@@ -163,14 +163,7 @@ class SelectDropdown extends HTMLElement {
                     cursor: pointer;
                     white-space: nowrap;
                     font-family: 'Roboto', sans-serif;
-                    width: -webkit-fill-available;
-                }
-
-                ::slotted(OFFselect-option[button-content]) {
-                    display: flex;
-                    align-items: center;
-                    flex-grow: 1;
-                    white-space: pre-wrap;
+                    width: -webkit-fill-available; 
                 }
 
                 ::slotted(select-option:last-child) {
@@ -221,7 +214,7 @@ class SelectDropdown extends HTMLElement {
 
             <button part="button">
                 <slot name="button_content"></slot>
-                <slot name="arrow"></div>
+                <slot id="arrow" name="arrow"></div>
             </button>
             <div class="after_button">
                 <div class="options" part="options">
@@ -231,22 +224,22 @@ class SelectDropdown extends HTMLElement {
         `
 
         this.attachShadow({ mode: 'open' })
-        this.shadowRoot.appendChild( template.content.cloneNode(true) )
+        this.shadowRoot.appendChild(template.content.cloneNode(true))
 
         this.button = this.shadowRoot.querySelector(':host > button')
         this.options = this.shadowRoot.querySelector('.options')
 
-        this.addEventListener('keydown', event => this.keydown( event ) )
-        this.addEventListener('mousedown', event => this.onmousedown( event ) )
-        this.button.addEventListener('focus', event => this.onfocus( event ) )
-        this.button.addEventListener('focusout', event => this.onfocusout( event ) )
-        this.button.addEventListener('click', event => this.toggle_open( event ) )
+        this.addEventListener('keydown', event => this.keydown(event))
+        this.addEventListener('mousedown', event => this.onmousedown(event))
+        this.button.addEventListener('focus', event => this.onfocus(event))
+        this.button.addEventListener('focusout', event => this.onfocusout(event))
+        this.button.addEventListener('click', event => this.toggle_open(event))
 
         this.selected_option = undefined
         this.preselected_option = undefined
 
-        const observer = new MutationObserver( mutations => this.update(mutations) )
-        observer.observe(this, { childList:true, subtree:false, attributes: false })
+        const observer = new MutationObserver(mutations => this.update(mutations))
+        observer.observe(this, { childList: true, subtree: false, attributes: false })
 
         this.close()
     }
@@ -269,47 +262,61 @@ class SelectDropdown extends HTMLElement {
         this.appendChild(this.button_content)
     }
 
-    update( mutations = [] ) {
+    update(mutations = []) {
         let nodes_added = []
         let nodes_removed = []
 
-        mutations.forEach( mutation => {
+        mutations.forEach(mutation => {
             // added children must be scanned looking for "selected" attributes, which will replace the current selected, ignoring non select-option children
-            nodes_added.push( ... Array.from(mutation.addedNodes).filter( node => node.tagName == OPTION_TAG_NAME.toUpperCase()) )
+            nodes_added.push(...Array.from(mutation.addedNodes).filter(node => node.tagName == OPTION_TAG_NAME.toUpperCase()))
             // removed children must be scanned looking for "selected" attributes, which will be replaced by a default, ignoring non select-option children
-            nodes_removed.push( ... Array.from(mutation.removedNodes).filter( node => node.tagName == OPTION_TAG_NAME.toUpperCase()) )
+            nodes_removed.push(...Array.from(mutation.removedNodes).filter(node => node.tagName == OPTION_TAG_NAME.toUpperCase()))
         })
 
-        nodes_removed.forEach( node => {
-            if( ! node.hasAttribute('selected') )
+        nodes_removed.forEach(node => {
+            if (!node.hasAttribute('selected'))
                 return
 
             this.check_selected()
         })
 
-        nodes_added.forEach( node => {
-            if( ! node.hasAttribute('selected') )
+        nodes_added.forEach(node => {
+            if (!node.hasAttribute('selected'))
                 return
 
-            this.set_option( node, true )
+            this.set_option(node, true)
         })
 
         // check if button_content has been removed, if that's the case: regenerate
-        if( this.button_content?.parentElement != this ) {
+        if (this.button_content?.parentElement != this) {
             this.create_button_content()
             this.update_button()
         }
+
+        this.update_arrow_size()
+    }
+
+    update_arrow_size() {
+        let max_width = 0
+        const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}`))
+        this.button_content.style.width = `unset`
+        options.forEach(option => {
+            const box = option.getBoundingClientRect()
+            max_width = box.width > max_width ? box.width : max_width
+        })
+
+        this.button_content.style.width = `${max_width}px`
     }
 
     check_selected() {
         // check if we have a selected option, restore the value and button if we don't
-        if( this.querySelector(OPTION_TAG_NAME + '[selected]') )
+        if (this.querySelector(OPTION_TAG_NAME + '[selected]'))
             return
 
         // if we have a placeholder, we use it
         const placeholder = this.querySelector(OPTION_TAG_NAME + '[placeholder]')
-        if( placeholder )
-            return this.set_option( placeholder, true )
+        if (placeholder)
+            return this.set_option(placeholder, true)
 
         // if not, we set just an empty
         this.selected_option = undefined
@@ -319,7 +326,7 @@ class SelectDropdown extends HTMLElement {
     // ==[Visuals]==============================================
 
     update_button() {
-        if( ! this.button_content )
+        if (!this.button_content)
             return
 
         const show_selected_on = this.getAttribute('show-selected-on') || 'both'
@@ -327,28 +334,28 @@ class SelectDropdown extends HTMLElement {
         const restore = this.querySelectorAll(OPTION_TAG_NAME + '[hidden-internal]') || []
 
         // restore previously hidden options
-        Array.from(restore).forEach( option => option.removeAttribute('hidden-internal'))
+        Array.from(restore).forEach(option => option.removeAttribute('hidden-internal'))
 
         // when opened, show the selected option only the list (button will show the placeholder)
-        if( opened && show_selected_on == 'list' ) {
+        if (opened && show_selected_on == 'list') {
             const placeholder = this.querySelector(OPTION_TAG_NAME + '[placeholder]')
             this.button_content.innerHTML = placeholder?.getAttribute?.('label') || placeholder?.innerHTML || ''
             return
         }
 
         // when opened, show the selected option only in the button (option in the list will be hidden)
-        if( opened && show_selected_on == 'button' ) {
+        if (opened && show_selected_on == 'button') {
             this.selected_option?.setAttribute('hidden-internal', '')
         }
 
         // show the selected option in both, button and list
         this.button_content.innerHTML = this.selected_option?.getAttribute?.('label') || this.selected_option?.innerHTML || ''
         this.button_content.className = ''
-        const option_classes = [ ... this.selected_option?.classList || [] ]
-        this.button_content.classList.add( ...option_classes )
+        const option_classes = [... this.selected_option?.classList || []]
+        this.button_content.classList.add(...option_classes)
     }
 
-    toggle_open( event ) {
+    toggle_open(event) {
         this.button.focus()
         this.button.classList.toggle('opened')
         this.options.classList.toggle('opened')
@@ -357,7 +364,7 @@ class SelectDropdown extends HTMLElement {
 
     close() {
         this.options.style.padding = 0
-        if(  ! this.options.classList.contains('opened') )
+        if (!this.options.classList.contains('opened'))
             return
         this.button.classList.remove('opened')
         this.options.classList.remove('opened')
@@ -366,29 +373,29 @@ class SelectDropdown extends HTMLElement {
 
     // ==[Events]===============================================
 
-    onfocusout( event ) {
+    onfocusout(event) {
         this.close()
     }
 
-    onfocus( event ) {
+    onfocus(event) {
         this.clean_preselected()
-        this.querySelector(`:scope > ${OPTION_TAG_NAME}[selected]`)?.setAttribute('pre-selected','')
+        this.querySelector(`:scope > ${OPTION_TAG_NAME}[selected]`)?.setAttribute('pre-selected', '')
     }
 
-    onmousedown( event ) {
+    onmousedown(event) {
         // mouse down remove the focus even if the target element is the current focused element
         // this drives us to the impossibility of closing an opened component by clicking on its button [ button.opened => focusout (close) => click (toggle = open ) ]
         // so to fix this, we cancel this default behaviour of mousedown
         event.preventDefault()
     }
 
-    enter( event ) {
+    enter(event) {
         // avoid the the default "PointerEvent" action (will mess with button focus)
         event.preventDefault()
 
         // open if closed
-        if( ! this.button.classList.contains('opened') || ! this.preselected_option )
-            return this.toggle_open( event )
+        if (!this.button.classList.contains('opened') || !this.preselected_option)
+            return this.toggle_open(event)
 
         // set the current option if opened and preselected
         this.preselected_option?.click()
@@ -396,38 +403,38 @@ class SelectDropdown extends HTMLElement {
 
     // ==[Accessibility]========================================
 
-    keydown( event ) {
-        switch( event.key ) {
+    keydown(event) {
+        switch (event.key) {
             // arrows scroll the page, prevent default behaviour here
-            case 'ArrowUp':   return event.preventDefault() || this.move('previousElementSibling')
+            case 'ArrowUp': return event.preventDefault() || this.move('previousElementSibling')
             case 'ArrowDown': return event.preventDefault() || this.move('nextElementSibling')
-            case 'Escape':    return this.close()
-            case 'Enter':     return this.enter( event )
+            case 'Escape': return this.close()
+            case 'Enter': return this.enter(event)
         }
     }
 
-    move( direction ) {
+    move(direction) {
         const forbidden = ['hidden', 'selected', 'button-content', 'disabled']
-        const selector  = `:scope > ${OPTION_TAG_NAME}`
-        const query_current = forbidden.reduce( (current, attribute) => `${current}:not([${attribute}])`, `${selector}[pre-selected]`)
-        const query_first   = forbidden.reduce( (current, attribute) => `${current}:not([${attribute}])`, `${selector}`)
+        const selector = `:scope > ${OPTION_TAG_NAME}`
+        const query_current = forbidden.reduce((current, attribute) => `${current}:not([${attribute}])`, `${selector}[pre-selected]`)
+        const query_first = forbidden.reduce((current, attribute) => `${current}:not([${attribute}])`, `${selector}`)
         const current = this.querySelector(query_current)
         let element = current?.[direction] || current || this.querySelector(query_first)
-        while( element && ( ! forbidden.every( attribute => ! element.hasAttribute(attribute) ) || element.tagName != 'SELECT-OPTION' ) )
+        while (element && (!forbidden.every(attribute => !element.hasAttribute(attribute)) || element.tagName != 'SELECT-OPTION'))
             element = element[direction]
         // the base slot element is the first and last sibling of any list of slotted elements, we ignore them
-        if( ! element || element.tagName == 'SLOT' || element == current )
+        if (!element || element.tagName == 'SLOT' || element == current)
             return
 
-        this.preselect( element )
+        this.preselect(element)
     }
 
     // ==[Value Control]========================================
 
-    preselect( option ) {
+    preselect(option) {
         this.clean_preselected()
 
-        if( option.hasAttribute('disabled') )
+        if (option.hasAttribute('disabled'))
             return
 
         option.setAttribute('pre-selected', '')
@@ -436,17 +443,17 @@ class SelectDropdown extends HTMLElement {
 
     clean_preselected() {
         const elements = this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}[pre-selected]`)
-        Array.from(elements).forEach( element => element.removeAttribute('pre-selected') )
+        Array.from(elements).forEach(element => element.removeAttribute('pre-selected'))
     }
 
-    set_option( option, internal = false ) {
+    set_option(option, internal = false) {
         // validate option
-        const options = Array.from( this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}`) )
-        if( ! options.includes( option ) )
+        const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}`))
+        if (!options.includes(option))
             throw "Error: The option must be a child of this select-dropdown."
 
         // remove selected attribute of any option (but the current one)
-        options.forEach( select_option => option != select_option && select_option.removeAttribute('selected') )
+        options.forEach(select_option => option != select_option && select_option.removeAttribute('selected'))
 
         // update the value and button content
         this.selected_option = option
@@ -454,16 +461,16 @@ class SelectDropdown extends HTMLElement {
         this.clean_preselected()
 
         // if the option we are selecting is a new one, we perform the change
-        if( this.querySelector(OPTION_TAG_NAME + '[selected]') != option ) {
+        if (this.querySelector(OPTION_TAG_NAME + '[selected]') != option) {
             // setting selected attribute and dispatching a change event
             option.setAttribute('pre-selected', '')
             option.setAttribute('selected', '')
-            ! internal && this.dispatchEvent( new Event('change', { bubbles: true, composed: true }) )
+            !internal && this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
         }
 
-        if( ! internal ) {
+        if (!internal) {
             // complete the current event listener execution then, focus
-            setTimeout( () => this.button.focus(), 1)
+            setTimeout(() => this.button.focus(), 1)
             this.close()
         }
     }
@@ -472,10 +479,10 @@ class SelectDropdown extends HTMLElement {
         return this.selected_option?.value || ''
     }
 
-    set value( value ) {
-        const options = Array.from( this.querySelectorAll(':scope > ' + OPTION_TAG_NAME) )
-        for( let option of options ) {
-            if( option.value == value && ! option.hasAttribute('button-content') )
+    set value(value) {
+        const options = Array.from(this.querySelectorAll(':scope > ' + OPTION_TAG_NAME))
+        for (let option of options) {
+            if (option.value == value && !option.hasAttribute('button-content'))
                 return this.set_option(option, true)
         }
     }
