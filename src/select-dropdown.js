@@ -166,6 +166,10 @@ class SelectDropdown extends HTMLElement {
                     width: -webkit-fill-available; 
                 }
 
+                ::slotted(select-option.auto-width) {
+                    width: min-content;
+                }
+
                 ::slotted(select-option:last-child) {
                     border: 0
                 }
@@ -298,12 +302,18 @@ class SelectDropdown extends HTMLElement {
 
     update_arrow_size() {
         let max_width = 0
-        const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}`))
-        this.button_content.style.width = `unset`
+        const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}:not([button-content])`))
+
+        // reset
+        options.forEach(option => (option.classList.add('auto-width')))
+
         options.forEach(option => {
             const box = option.getBoundingClientRect()
             max_width = box.width > max_width ? box.width : max_width
         })
+
+        // restore
+        options.forEach(option => (option.classList.remove('auto-width')))
 
         this.button_content.style.width = `${max_width}px`
     }
