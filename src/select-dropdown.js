@@ -302,6 +302,13 @@ class SelectDropdown extends HTMLElement {
 
     update_arrow_size() {
         let max_width = 0
+        const arrow = this.querySelector(`:scope > ${ARROW_TAG_NAME}`)
+
+        if (!arrow) {
+            this.button_content.style.minWidth = `unset`
+            return
+        }
+
         const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}:not([button-content])`))
 
         // reset
@@ -315,7 +322,7 @@ class SelectDropdown extends HTMLElement {
         // restore
         options.forEach(option => (option.classList.remove('auto-width')))
 
-        this.button_content.style.width = `${max_width}px`
+        this.button_content.style.minWidth = `${max_width}px`
     }
 
     check_selected() {
