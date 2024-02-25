@@ -236,7 +236,7 @@ class SelectDropdown extends HTMLElement {
         this.addEventListener('keydown', event => this.keydown(event))
         this.addEventListener('mousedown', event => this.onmousedown(event))
         this.button.addEventListener('focus', event => this.onfocus(event))
-        this.button.addEventListener('focusout', event => this.onfocusout(event))
+        this.addEventListener('focusout', event => this.onfocusout(event))
         this.button.addEventListener('click', event => this.toggle_open(event))
 
         this.selected_option = undefined
@@ -391,6 +391,19 @@ class SelectDropdown extends HTMLElement {
     // ==[Events]===============================================
 
     onfocusout(event) {
+        // we can't use this.shadowRoot.contains(event.relatedTarget) as contains won't check children shadow dom
+        // so we check manually if the new focus is a children element
+
+        let related = event.relatedTarget
+
+        while (related) {
+            // related was a child element: nothing to do
+            if (related == this)
+                return
+            related = related.parentElement
+        }
+
+        // related was not a child element: close
         this.close()
     }
 
