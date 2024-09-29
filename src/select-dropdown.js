@@ -235,9 +235,11 @@ class SelectDropdown extends HTMLElement {
 
         this.addEventListener('keydown', event => this.keydown(event))
         this.addEventListener('mousedown', event => this.onmousedown(event))
+        this.addEventListener('childfocusout', event => this.onchildfocusout(event))
         this.button.addEventListener('focus', event => this.onfocus(event))
-        this.addEventListener('focusout', event => this.onfocusout(event))
+        this.button.addEventListener('focusout', event => this.onfocusout(event))
         this.button.addEventListener('click', event => this.toggle_open(event))
+
 
         this.selected_option = undefined
         this.preselected_option = undefined
@@ -391,20 +393,16 @@ class SelectDropdown extends HTMLElement {
     // ==[Events]===============================================
 
     onfocusout(event) {
-        // we can't use this.shadowRoot.contains(event.relatedTarget) as contains won't check children shadow dom
-        // so we check manually if the new focus is a children element
+        if (!this.contains(event.relatedTarget))
+            this.close()
+        // for nested dropdowns: parent lost the focus when nested child was focused, so it won't lost the focus again and won't be closed when the child lost its own
+        // so we throw a custom event for potential parent dropdowns
+        this.dispatchEvent(new CustomEvent('childfocusout', { bubbles: true, composed: true, taget: this, relatedTarget: event.relatedTarget, custom: true }))
+    }
 
-        let related = event.relatedTarget
-
-        while (related) {
-            // related was a child element: nothing to do
-            if (related == this)
-                return
-            related = related.parentElement
-        }
-
-        // related was not a child element: close
-        this.close()
+    onchildfocusout(event) {
+        if (event.target != this)
+            this.close()
     }
 
     onfocus(event) {
@@ -477,10 +475,7 @@ class SelectDropdown extends HTMLElement {
     }
 
     set_option(option, internal = false) {
-        // validate option
         const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}`))
-        if (!options.includes(option))
-            throw "Error: The option must be a child of this select-dropdown."
 
         // remove selected attribute of any option (but the current one)
         options.forEach(select_option => option != select_option && select_option.removeAttribute('selected'))
