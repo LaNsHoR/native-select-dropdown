@@ -4,9 +4,9 @@ describe('Static render and parsing', () => {
   beforeEach(() => { cy.visit('/') })
 
   it('Render works ok.', () => {
-    cy.get('select-dropdown').should('have.lengthOf', 16)
-    cy.get('select-option').should('have.lengthOf', 118)
-    cy.get('select-arrow').should('have.lengthOf', 4)
+    cy.get('select-dropdown').should('have.lengthOf', 17)
+    cy.get('select-option').should('have.lengthOf', 123)
+    cy.get('select-arrow').should('have.lengthOf', 5)
   })
 
   it('Invalid children are discarded.', () => {
@@ -519,5 +519,25 @@ describe('Onchange Events', () => {
 
   it('Connected and disconnected element work as expected', () => {
     test_id('sd11').find('select-option[button-content]').should('have.lengthOf', 1)
+  })
+})
+
+describe('Disabled attribute', () => {
+  beforeEach(() => { cy.visit('/') })
+
+  it('Disabled attribrute prevents the dropdown to be opened', () => {
+    // for no reason, cypress makes a click when focusing this button, but only in this test, so we need to press ENTER twice
+    test_id('sd17').shadow().find('button').focus().type('{enter}{enter}', { force: true })
+    test_id('sd17').shadow().find('.options').should('not.be.visible')
+  })
+
+  it('Adding disabled programatically hides the options if they are opened', () => {
+    test_id('sd17').click().then(element => {
+      const dropdown = element.get(0)
+      dropdown.removeAttribute('disabled')
+      dropdown.toggle_open()
+      dropdown.setAttribute('disabled', '')
+      test_id('sd17').shadow().find('.options').should('not.be.visible')
+    })
   })
 })

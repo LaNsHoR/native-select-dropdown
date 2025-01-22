@@ -63,6 +63,7 @@ Defines a new select-dropdown element. All its children must to be `<select-opti
     - `both`: This is de default behaviour if not `show-selected-on` attribute has been set. When the option list is opened, it renders the selected option in both: the option list itself and the dropdown button.
     - `button`: The selected option is removed from the option list when selected, so it's only rendered on the dropdown button.
     - `list`: When the option list is opened, the selected option is rendered on the list but the button will render the placeholder. As soon the the list closed the dropdown button will render the selected option again.
+- `disabled`: Makes the dropdown disabled, preventing any user interaction. This attribute doesn't need any value, if present, the dropdown becomes disabled. By default a disabled dropdown has a style opacity of 0.5; you can change this with standard CSS, see the styling section for more info.
 
     For clarity, consider the following example:
 

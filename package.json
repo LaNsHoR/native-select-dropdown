@@ -1,6 +1,6 @@
 {
   "name": "native-select-dropdown",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A select-dropdown to replace the vanilla select element and its options.",
   "main": "src/select-dropdown.js",
   "scripts": {

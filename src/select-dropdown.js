@@ -107,6 +107,10 @@ class SelectDropdown extends HTMLElement {
                     flex-direction: column;
                 }
 
+                :host(select-dropdown[disabled]) {
+                    opacity: 0.5
+                }
+
                 :host > button {
                     color: #568;
                     background: #fff;
@@ -154,6 +158,10 @@ class SelectDropdown extends HTMLElement {
                 :host > .after_button > .options.opened {
                     visibility: visible;
                     max-height: unset;
+                }
+
+                :host(select-dropdown[disabled]) > .after_button > .options.opened {
+                    visibility: hidden
                 }
 
                 ::slotted(select-option) {
@@ -376,6 +384,13 @@ class SelectDropdown extends HTMLElement {
 
     toggle_open(event) {
         this.button.focus()
+
+        if (this.hasAttribute('disabled')) {
+            // to close other opened dropdowns we need to focus the button first (line above) then blur
+            this.button.blur()
+            return this.close()
+        }
+
         this.button.classList.toggle('opened')
         this.options.classList.toggle('opened')
         this.update_button()
@@ -420,6 +435,10 @@ class SelectDropdown extends HTMLElement {
     enter(event) {
         // avoid the the default "PointerEvent" action (will mess with button focus)
         event.preventDefault()
+
+        // if disabled, we do nothing
+        if (this.hasAttribute('disabled'))
+            return
 
         // open if closed
         if (!this.button.classList.contains('opened') || !this.preselected_option)
