@@ -27,6 +27,14 @@
             margin-top: 10px;
         }
 
+        .dark::part(search-input) {
+            background: #3d3d3d;
+            padding: 10px;
+            box-shadow: none;
+            border: 2px solid #000000;
+            color: white;
+        }
+
         .dark select-option {
             background: #1b1b1a;
             color: #c8c8c8;
@@ -325,6 +333,43 @@
             <select-option>Two</select-option>
             <select-option>Three</select-option>
         </select-dropdown>
+
+        <select-dropdown data-test-id="sd18" display-search>
+            <select-option hidden>Dog</select-option>
+            <select-option>Cat</select-option>
+            <select-option disabled>Snake</select-option>
+            <select-option>Panda</select-option>
+            <select-option value="custom value">Shark</select-option>
+            <select-option disabled>Lion</select-option>
+            <select-option hidden selected value="My <b>custom</b> value" disabled>Say <b>18</b></select-option>
+            <select-option disabled>Tiger</select-option>
+            <select-option>Gentoo Penguin</select-option>
+        </select-dropdown>
+
+        <select-dropdown data-test-id="sd19" display-search="true">
+            <select-option hidden>Dog</select-option>
+            <select-option>Cat</select-option>
+            <select-option disabled>Snake</select-option>
+            <select-option>Panda</select-option>
+            <select-option value="custom value">Shark</select-option>
+            <select-option disabled>Lion</select-option>
+            <select-option hidden selected value="My <b>custom</b> value" disabled>Say <b>19</b></select-option>
+            <select-option disabled>Tiger</select-option>
+            <select-option>Gentoo Penguin</select-option>
+        </select-dropdown>
+
+        <select-dropdown data-test-id="sd20" display-search="3">
+            <select-option hidden>Dog</select-option>
+            <select-option>20</select-option>
+            <select-option disabled>Snake</select-option>
+        </select-dropdown>
+
+        <select-dropdown data-test-id="sd21" display-search="3" class="dark">
+            <select-option>Dog</select-option>
+            <select-option>21</select-option>
+            <select-option disabled>Snake</select-option>
+        </select-dropdown>
+
 
         <script>
             const dropdown = document.getElementById('my_dropdown')

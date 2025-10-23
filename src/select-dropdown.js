@@ -182,6 +182,10 @@ class SelectDropdown extends HTMLElement {
                     border: 0
                 }
 
+                ::slotted(select-option.hidden) {
+                    display: none;
+                }
+
                 ::slotted(select-option[pre-selected]), ::slotted(select-option:focus-within) {
                     background: #68ceff;
                     color: #ffffff;
@@ -213,6 +217,46 @@ class SelectDropdown extends HTMLElement {
                     align-items: center;
                 }
 
+                #search_box {
+                    display: flex;
+                    align-items: stretch;
+                    justify-content: center;
+                }
+
+                #search_box input {
+                    outline: 0;
+                    border: 0;
+                    border-bottom: 1px solid #e8eaed;
+                    padding: 7px 12px;
+                    display: block;
+                    white-space: nowrap;
+                    font-family: 'Roboto', sans-serif;
+                    width: 100%;
+                    font-size: 16px;
+                    color: #568;
+                }
+
+                #search_x {
+                    cursor: pointer;
+                    background: none;
+                    border: 0;
+                    border-bottom: 1px solid #e8eaed;
+                }
+
+                #search_x.hidden {
+                    display: none;
+                }
+                
+                #search_box input::-webkit-search-cancel-button {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    display: none;
+                }
+
+                #search_box.hidden {
+                    display: none;
+                }
+
                 ::slotted(select-arrow[position="left"]) {
                     order: -1;
                     margin-left: 12px;
@@ -226,10 +270,14 @@ class SelectDropdown extends HTMLElement {
 
             <button part="button">
                 <slot name="button_content"></slot>
-                <slot id="arrow" name="arrow"></div>
+                <slot id="arrow" name="arrow"></slot>
             </button>
             <div class="after_button">
                 <div class="options" part="options">
+                    <div class="search" id="search_box" part="search-box">
+                        <input type="search" id="search_input" part="search-input" />
+                        <button id="search_x" part="search-x">✕</button>
+                    </div>
                     <slot name='option'></slot>
                 </div>
             </div>
@@ -240,6 +288,9 @@ class SelectDropdown extends HTMLElement {
 
         this.button = this.shadowRoot.querySelector(':host > button')
         this.options = this.shadowRoot.querySelector('.options')
+        this.search_box = this.shadowRoot.getElementById('search_box')
+        this.search_input = this.shadowRoot.getElementById('search_input')
+        this.search_x = this.shadowRoot.getElementById('search_x')
 
         this.addEventListener('keydown', event => this.keydown(event))
         this.addEventListener('mousedown', event => this.onmousedown(event))
@@ -248,12 +299,19 @@ class SelectDropdown extends HTMLElement {
         this.button.addEventListener('focusout', event => this.onfocusout(event))
         this.button.addEventListener('click', event => this.toggle_open(event))
 
-
         this.selected_option = undefined
         this.preselected_option = undefined
 
         const observer = new MutationObserver(mutations => this.update(mutations))
         observer.observe(this, { childList: true, subtree: false, attributes: false })
+        this.search_input.addEventListener('search', () => this.filter_options())
+        this.search_input.addEventListener('input', () => this.filter_options())
+        this.search_input.addEventListener('focusout', event => this.onfocusout(event))
+
+        this.search_x.addEventListener('click', () => {
+            this.search_input.value = ''
+            this.filter_options()
+        })
 
         this.close()
     }
@@ -264,6 +322,37 @@ class SelectDropdown extends HTMLElement {
 
         //  add the default placeholder if we need to
         this.check_selected()
+
+        // display search box or not
+        this.control_search_box_visibility()
+        this.filter_options()
+    }
+
+    // ==[Search control]=======================================
+
+    get_visible_options() {
+        return Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}:not([button-content]):not([hidden])`))
+    }
+
+    control_search_box_visibility() {
+        const display_search = this.getAttribute('display-search')
+        const display_number = display_search === null ? NaN : Number(display_search)
+        const show = !Number.isNaN(display_number) ? display_number <= this.get_visible_options().length : Boolean(display_search)
+        this.search_box.classList.toggle('hidden', !show)
+    }
+
+    filter_options() {
+        const filter_value = this.search_input.value.trim().toLowerCase()
+        const options = this.get_visible_options()
+        const has_filter = Boolean(filter_value)
+        this.search_x.classList.toggle('hidden', !has_filter)
+
+        options.forEach(option => {
+            const text = (option.getAttribute('label') || '').toLowerCase()
+            const label = (option.textContent || '').toLowerCase()
+            const match = !filter_value || text.includes(filter_value) || label.includes(filter_value)
+            option.classList.toggle('hidden', !match)
+        })
     }
 
     // ==[Change control]=======================================
@@ -353,6 +442,8 @@ class SelectDropdown extends HTMLElement {
     // ==[Visuals]==============================================
 
     update_button() {
+        this.control_search_box_visibility()
+
         if (!this.button_content)
             return
 
@@ -408,6 +499,11 @@ class SelectDropdown extends HTMLElement {
     // ==[Events]===============================================
 
     onfocusout(event) {
+        // don't close when using the search input
+        const skip = [this.search_input, this.search_x]
+        if (skip.includes(event.relatedTarget))
+            return
+
         if (!this.contains(event.relatedTarget))
             this.close()
         // for nested dropdowns: parent lost the focus when nested child was focused, so it won't lost the focus again and won't be closed when the child lost its own
@@ -426,6 +522,10 @@ class SelectDropdown extends HTMLElement {
     }
 
     onmousedown(event) {
+        const path = event.composedPath()
+        // don't block clicks in the search box
+        if (path.includes(this.search_box))
+            return
         // mouse down remove the focus even if the target element is the current focused element
         // this drives us to the impossibility of closing an opened component by clicking on its button [ button.opened => focusout (close) => click (toggle = open ) ]
         // so to fix this, we cancel this default behaviour of mousedown

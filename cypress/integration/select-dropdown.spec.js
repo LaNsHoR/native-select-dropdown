@@ -4,8 +4,8 @@ describe('Static render and parsing', () => {
   beforeEach(() => { cy.visit('/') })
 
   it('Render works ok.', () => {
-    cy.get('select-dropdown').should('have.lengthOf', 17)
-    cy.get('select-option').should('have.lengthOf', 123)
+    cy.get('select-dropdown').should('have.lengthOf', 21)
+    cy.get('select-option').should('have.lengthOf', 151)
     cy.get('select-arrow').should('have.lengthOf', 5)
   })
 
@@ -538,6 +538,40 @@ describe('Disabled attribute', () => {
       dropdown.toggle_open()
       dropdown.setAttribute('disabled', '')
       test_id('sd17').shadow().find('.options').should('not.be.visible')
+    })
+  })
+})
+
+describe('Search box', () => {
+  beforeEach(() => { cy.visit('/') })
+
+  it('Attribute not present do not activate the search box', () => {
+    test_id('sd17').click().then(element => {
+      test_id('sd17').shadow().find('#search_box').should('not.be.visible')
+    })
+  })
+
+  it('Attribute present activates the search box', () => {
+    test_id('sd18').click().then(element => {
+      test_id('sd18').shadow().find('#search_box').should('be.visible')
+    })
+  })
+
+  it('Attribute with value activates the search box', () => {
+    test_id('sd19').click().then(element => {
+      test_id('sd19').shadow().find('#search_box').should('be.visible')
+    })
+  })
+
+  it('Attribute with number less than options do not activate the search box', () => {
+    test_id('sd20').click().then(element => {
+      test_id('sd20').shadow().find('#search_box').should('not.be.visible')
+    })
+  })
+
+  it('Attribute with number greater or equial to options activates the search box', () => {
+    test_id('sd21').click().then(element => {
+      test_id('sd21').shadow().find('#search_box').should('be.visible')
     })
   })
 })
