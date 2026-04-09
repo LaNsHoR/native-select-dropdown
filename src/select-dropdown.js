@@ -100,6 +100,8 @@ class SelectDropdown extends HTMLElement {
 
         const template = document.createElement('template')
 
+        this.internal_id = `SD_${crypto?.randomUUID?.() || String(Math.random()).replaceAll('.', '')}`
+
         template.innerHTML = `
             <style>
                 :host(select-dropdown) {
@@ -122,6 +124,7 @@ class SelectDropdown extends HTMLElement {
                     text-align: left;
                     font-family: 'Roboto', sans-serif;
                     padding: 0;
+                    anchor-name: --${this.internal_id};
                 }
 
                 :host > button.opened {
@@ -140,7 +143,6 @@ class SelectDropdown extends HTMLElement {
                 :host > .after_button {
                     height: 0;
                     overflow:visible;
-                    z-index: 99999;
                 }
 
                 :host > .after_button > .options {
@@ -153,6 +155,17 @@ class SelectDropdown extends HTMLElement {
                     max-height: 0px;
                     box-sizing: border-box;
                     box-shadow: 0 1px 3px -2px #9098A9;
+                    position-anchor: --${this.internal_id};
+                    top: anchor(bottom);
+                    left: anchor(left);
+                    position: absolute;
+                    margin: 0;
+                    position-try:
+                        top anchor(bottom),
+                        bottom anchor(top);
+                    position-try-fallbacks:
+                        left anchor(left),
+                        right anchor(right);
                 }
 
                 :host > .after_button > .options.opened {
@@ -268,12 +281,12 @@ class SelectDropdown extends HTMLElement {
                 }
             </style>
 
-            <button part="button">
+            <button part="button" popovertarget="${this.internal_id}">
                 <slot name="button_content"></slot>
                 <slot id="arrow" name="arrow"></slot>
             </button>
             <div class="after_button">
-                <div class="options" part="options">
+                <div class="options" part="options" popover id="${this.internal_id}">
                     <div class="search" id="search_box" part="search-box">
                         <input type="search" id="search_input" part="search-input" />
                         <button id="search_x" part="search-x">✕</button>
