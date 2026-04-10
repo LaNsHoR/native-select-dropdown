@@ -333,6 +333,7 @@ class SelectDropdown extends HTMLElement {
     }
 
     static get observedAttributes() {
+        // TODO: control dynamically attributes for search
         return ['disabled']
     }
 
@@ -348,10 +349,6 @@ class SelectDropdown extends HTMLElement {
         return this.options.matches(':popover-open')
     }
 
-    set search_placeholder( placeholder ) {
-        this.search_input.placeholder = placeholder
-    }
-
     // ==[Search control]=======================================
 
     get_visible_options() {
@@ -362,6 +359,8 @@ class SelectDropdown extends HTMLElement {
         const display_search = this.getAttribute('display-search')
         const display_number = display_search === null ? NaN : Number(display_search)
         const show = !Number.isNaN(display_number) ? display_number <= this.get_visible_options().length : Boolean(display_search)
+        const placeholder = this.getAttribute('search-placeholder')
+        this.search_input.placeholder = placeholder || ''
         this.search_box.classList.toggle('hidden', !show)
     }
 
