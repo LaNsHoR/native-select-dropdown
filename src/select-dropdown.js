@@ -348,6 +348,10 @@ class SelectDropdown extends HTMLElement {
         return this.options.matches(':popover-open')
     }
 
+    set search_placeholder( placeholder ) {
+        this.search_input.placeholder = placeholder
+    }
+
     // ==[Search control]=======================================
 
     get_visible_options() {
