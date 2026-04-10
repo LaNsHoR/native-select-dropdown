@@ -1,6 +1,6 @@
 {
   "name": "native-select-dropdown",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "description": "A select-dropdown to replace the vanilla select element and its options.",
   "main": "src/select-dropdown.js",
   "scripts": {
@@ -20,7 +20,7 @@
   "license": "MIT",
   "devDependencies": {
     "@cypress/webpack-dev-server": "^1.8.0",
-    "cypress": "^9.2.1",
+    "cypress": "^15.13.1",
     "webpack": "^5.66.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.3"
@@ -28,7 +28,6 @@
   "directories": {
     "test": "tests"
   },
-  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LaNsHoR/native-select-dropdown.git"

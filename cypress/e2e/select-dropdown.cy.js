@@ -338,33 +338,33 @@ describe('Mouse interactions', () => {
   beforeEach(() => { cy.visit('/') })
 
   it('Option list is closed by default', () => {
-    test_id('sd1').shadow().find('.options').should('not.be.visible')
+    test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
   })
 
   it('Option list is opened after clicking', () => {
     test_id('sd1').click().then(_ =>
-      test_id('sd1').shadow().find('.options').should('be.visible')
+      test_id('sd1').shadow().find('.options').should('match', ':popover-open')
     )
   })
 
   it('Option list is closed after clicking when it is opened', () => {
     test_id('sd1').click({ force: true }).then(_ =>
       test_id('sd1').click({ force: true }).then(_ =>
-        test_id('sd1').shadow().find('.options').should('not.be.visible')
+        test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
       ))
   })
 
   it('Option list is closed after losing focus', () => {
     test_id('sd1').click({ force: true }).then(_ =>
       test_id('sd2').click({ force: true }).then(_ =>
-        test_id('sd1').shadow().find('.options').should('not.be.visible')
+        test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
       ))
   })
 
   it('Click an option', () => {
     test_id('sd1').click({ force: true }).then(_ =>
       test_id('so1').click({ force: true }).then(_ => {
-        test_id('sd1').shadow().find('.options').should('not.be.visible')
+        test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
         test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'Panda')
         test_id('sd1').should('have.value', 'Panda')
       }))
@@ -374,7 +374,7 @@ describe('Mouse interactions', () => {
     // Browser page should be focused to pass this test, see this Cypress bug: https://github.com/cypress-io/cypress/issues/5023
     test_id('sd1').click().then(_ =>
       test_id('so2').click({ force: true }).then(_ => {
-        test_id('sd1').shadow().find('.options').should('be.visible')
+        test_id('sd1').shadow().find('.options').should('match', ':popover-open')
         test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'Select an animal')
         test_id('sd1').should('have.value', '')
       }))
@@ -387,59 +387,58 @@ describe('Keyboard interactions', () => {
   // TODO: Tests TAB navigation once Cypress supports TABs properly: https://github.com/cypress-io/cypress/issues/299
 
   it('Enter opens a closed dropdown', () => {
-    // for no reason, cypress makes a click when focusing this button, but only in this test, so we need to press ENTER twice
-    test_id('sd1').shadow().find('button').focus().type('{enter}{enter}', { force: true })
-    test_id('sd1').shadow().find('.options').should('be.visible')
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}', { force: true })
+    test_id('sd1').shadow().find('.options').should('match', ':popover-open')
   })
 
   it('Enter closes an opened dropdown', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}', { force: true }).type('{enter}', { force: true })
-    test_id('sd1').shadow().find('.options').should('not.be.visible')
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}', { force: true }).type('{enter}', { force: true })
+    test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
   })
 
   it('Navigation with arrow down starts with the first visible option', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}{downarrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{downarrow}', { force: true })
     test_id('sd1').find('select-option[pre-selected]').should('have.text', 'Dog')
   })
 
   it('Navigation with arrow down skips disabled options', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}{downarrow}{downarrow}{downarrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{downarrow}{downarrow}{downarrow}', { force: true })
     test_id('sd1').find('select-option[pre-selected]').should('have.text', 'Panda')
   })
 
   it('Navigation with arrow down stops with the last element', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}', { force: true })
     test_id('sd1').find('select-option[pre-selected]').should('have.text', 'Gentoo Penguin')
   })
 
   it('Navigation with arrow up starts with the first visible option', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}{uparrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{uparrow}', { force: true })
     test_id('sd1').find('select-option[pre-selected]').should('have.text', 'Dog')
   })
 
   it('Navigation with arrow up skips disabled options', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{uparrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{downarrow}{uparrow}', { force: true })
     test_id('sd1').find('select-option[pre-selected]').should('have.text', 'Shark')
   })
 
   it('Navigation with arrow up stops with the first element', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}{uparrow}{uparrow}{uparrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{uparrow}{uparrow}{uparrow}', { force: true })
     test_id('sd1').find('select-option[pre-selected]').should('have.text', 'Dog')
   })
 
   it('Enters set the selected option', () => {
     // Browser page should be focused to pass this test, see this Cypress bug: https://github.com/cypress-io/cypress/issues/5023
-    test_id('sd1').shadow().find('button').focus().type('{enter}{downarrow}{downarrow}{downarrow}{downarrow}{uparrow}', { force: true })
-    test_id('sd1').shadow().find('button').focus().type('{enter}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}{downarrow}{downarrow}{downarrow}{downarrow}{uparrow}', { force: true })
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}', { force: true })
 
-    test_id('sd1').shadow().find('.options').should('not.be.visible')
+    test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
     test_id('sd1').find('select-option[slot="button_content"]').should('have.text', 'Panda')
     test_id('sd1').should('have.value', 'Panda')
   })
 
   it('ESC closes an opened dropdown', () => {
-    test_id('sd1').shadow().find('button').focus().type('{enter}', { force: true }).type('{esc}', { force: true })
-    test_id('sd1').shadow().find('.options').should('not.be.visible')
+    test_id('sd1').shadow().find('button[part="button"]').focus().type('{enter}', { force: true }).type('{esc}', { force: true })
+    test_id('sd1').shadow().find('.options').should('not.match', ':popover-open')
   })
 })
 
@@ -495,11 +494,11 @@ describe('Onchange Events', () => {
   beforeEach(() => { cy.visit('/') })
 
   it('Onchange event is fired', () => {
-    test_id('sd11').click().then(element => {
+    test_id('sd11').click({ force: true }).then(element => {
       let current_event = false
       const dropdown = element.get(0)
       dropdown.onchange = event => (current_event = event)
-      test_id('so11').click().then(_ => {
+      test_id('so11').click({ force: true }).then(_ => {
         expect(current_event?.composed).to.be.true
         expect(current_event?.bubbles).to.be.true
       })
@@ -507,11 +506,11 @@ describe('Onchange Events', () => {
   })
 
   it('Onchange event is fired only once', () => {
-    test_id('sd11').click().then(element => {
+    test_id('sd11').click({ force: true }).then(element => {
       let current_event = 0
       const dropdown = element.get(0)
       dropdown.onchange = event => (current_event++)
-      test_id('so11').click().then(_ => {
+      test_id('so11').click({ force: true }).then(_ => {
         expect(current_event).to.be.equal(1)
       })
     })
@@ -526,9 +525,8 @@ describe('Disabled attribute', () => {
   beforeEach(() => { cy.visit('/') })
 
   it('Disabled attribrute prevents the dropdown to be opened', () => {
-    // for no reason, cypress makes a click when focusing this button, but only in this test, so we need to press ENTER twice
-    test_id('sd17').shadow().find('button').focus().type('{enter}{enter}', { force: true })
-    test_id('sd17').shadow().find('.options').should('not.be.visible')
+    test_id('sd17').shadow().find('button[part="button"]').focus().type('{enter}', { force: true })
+    test_id('sd17').shadow().find('.options').should('not.match', ':popover-open')
   })
 
   it('Adding disabled programatically hides the options if they are opened', () => {
@@ -537,7 +535,7 @@ describe('Disabled attribute', () => {
       dropdown.removeAttribute('disabled')
       dropdown.toggle_open()
       dropdown.setAttribute('disabled', '')
-      test_id('sd17').shadow().find('.options').should('not.be.visible')
+      test_id('sd17').shadow().find('.options').should('not.match', ':popover-open')
     })
   })
 })
@@ -547,7 +545,7 @@ describe('Search box', () => {
 
   it('Attribute not present do not activate the search box', () => {
     test_id('sd17').click().then(element => {
-      test_id('sd17').shadow().find('#search_box').should('not.be.visible')
+      test_id('sd17').shadow().find('#search_box').should('not.match', ':popover-open')
     })
   })
 

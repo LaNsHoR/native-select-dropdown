@@ -36,7 +36,7 @@ class SelectOption extends HTMLElement {
         if (this.hasAttribute('button-content'))
             return
 
-        this.addEventListener('mousedown', () => this.click())
+        this.addEventListener('mousedown', event => this.click(event))
         this.addEventListener('mouseover', () => this.parentElement.preselect(this))
         this.addEventListener('keydown', event => this.keydown(event))
 
@@ -75,9 +75,12 @@ class SelectOption extends HTMLElement {
         })
     }
 
-    click() {
-        if (this.hasAttribute('disabled') || this.hasAttribute('button-content'))
+    click(event) {
+        if (this.hasAttribute('disabled') || this.hasAttribute('button-content')) {
+            event?.preventDefault()
+            event?.stopPropagation()
             return
+        }
         this.parentElement.set_option(this)
     }
 
@@ -151,14 +154,12 @@ class SelectDropdown extends HTMLElement {
                     border: 1px solid #e8eaed;
                     border-radius: 0 0 5px 5px;
                     z-index: 100;
-                    visibility: hidden;
-                    max-height: 0px;
                     box-sizing: border-box;
                     box-shadow: 0 1px 3px -2px #9098A9;
                     position-anchor: --${this.internal_id};
                     top: anchor(bottom);
                     left: anchor(left);
-                    position: absolute;
+                    position: fixed;
                     margin: 0;
                     position-try:
                         top anchor(bottom),
@@ -166,15 +167,6 @@ class SelectDropdown extends HTMLElement {
                     position-try-fallbacks:
                         left anchor(left),
                         right anchor(right);
-                }
-
-                :host > .after_button > .options.opened {
-                    visibility: visible;
-                    max-height: unset;
-                }
-
-                :host(select-dropdown[disabled]) > .after_button > .options.opened {
-                    visibility: hidden
                 }
 
                 ::slotted(select-option) {
@@ -281,12 +273,12 @@ class SelectDropdown extends HTMLElement {
                 }
             </style>
 
-            <button part="button" popovertarget="${this.internal_id}">
+            <button part="button">
                 <slot name="button_content"></slot>
                 <slot id="arrow" name="arrow"></slot>
             </button>
             <div class="after_button">
-                <div class="options" part="options" popover id="${this.internal_id}">
+                <div class="options" part="options" popover="manual" id="${this.internal_id}">
                     <div class="search" id="search_box" part="search-box">
                         <input type="search" id="search_input" part="search-input" />
                         <button id="search_x" part="search-x">✕</button>
@@ -306,7 +298,6 @@ class SelectDropdown extends HTMLElement {
         this.search_x = this.shadowRoot.getElementById('search_x')
 
         this.addEventListener('keydown', event => this.keydown(event))
-        this.addEventListener('mousedown', event => this.onmousedown(event))
         this.addEventListener('childfocusout', event => this.onchildfocusout(event))
         this.button.addEventListener('focus', event => this.onfocus(event))
         this.button.addEventListener('focusout', event => this.onfocusout(event))
@@ -339,6 +330,22 @@ class SelectDropdown extends HTMLElement {
         // display search box or not
         this.control_search_box_visibility()
         this.filter_options()
+    }
+
+    static get observedAttributes() {
+        return ['disabled']
+    }
+
+    attributeChangedCallback(name, old_value, new_value) {
+        switch(name) {
+            case 'disabled':
+                if(this.hasAttribute('disabled'))
+                    this.close()
+        }
+    }
+
+    get is_open() {
+        return this.options.matches(':popover-open')
     }
 
     // ==[Search control]=======================================
@@ -461,21 +468,20 @@ class SelectDropdown extends HTMLElement {
             return
 
         const show_selected_on = this.getAttribute('show-selected-on') || 'both'
-        const opened = this.button.classList.contains('opened')
         const restore = this.querySelectorAll(OPTION_TAG_NAME + '[hidden-internal]') || []
 
         // restore previously hidden options
         Array.from(restore).forEach(option => option.removeAttribute('hidden-internal'))
 
         // when opened, show the selected option only the list (button will show the placeholder)
-        if (opened && show_selected_on == 'list') {
+        if (this.is_open && show_selected_on == 'list') {
             const placeholder = this.querySelector(OPTION_TAG_NAME + '[placeholder]')
             this.button_content.innerHTML = placeholder?.getAttribute?.('label') || placeholder?.innerHTML || ''
             return
         }
 
         // when opened, show the selected option only in the button (option in the list will be hidden)
-        if (opened && show_selected_on == 'button') {
+        if (this.is_open && show_selected_on == 'button') {
             this.selected_option?.setAttribute('hidden-internal', '')
         }
 
@@ -495,33 +501,36 @@ class SelectDropdown extends HTMLElement {
             return this.close()
         }
 
-        this.button.classList.toggle('opened')
-        this.options.classList.toggle('opened')
+        if( this.is_open )
+            this.options.hidePopover()
+        else
+            this.options.showPopover()
+
+        this.button.classList.toggle('opened', this.is_open)
+
         this.update_button()
     }
 
     close() {
-        this.options.style.padding = 0
-        if (!this.options.classList.contains('opened'))
+        if (! this.is_open )
             return
+        this.options.hidePopover()
         this.button.classList.remove('opened')
-        this.options.classList.remove('opened')
         this.update_button()
     }
 
     // ==[Events]===============================================
 
     onfocusout(event) {
-        // don't close when using the search input
-        const skip = [this.search_input, this.search_x]
-        if (skip.includes(event.relatedTarget))
+        const next = event.relatedTarget
+
+        if (this.contains(next) || this.shadowRoot.contains(next))
             return
 
-        if (!this.contains(event.relatedTarget))
-            this.close()
+        this.close()
         // for nested dropdowns: parent lost the focus when nested child was focused, so it won't lost the focus again and won't be closed when the child lost its own
         // so we throw a custom event for potential parent dropdowns
-        this.dispatchEvent(new CustomEvent('childfocusout', { bubbles: true, composed: true, taget: this, relatedTarget: event.relatedTarget, custom: true }))
+        this.dispatchEvent(new CustomEvent('childfocusout', { bubbles: true, composed: true, relatedTarget: event.relatedTarget }))
     }
 
     onchildfocusout(event) {
@@ -534,17 +543,6 @@ class SelectDropdown extends HTMLElement {
         this.querySelector(`:scope > ${OPTION_TAG_NAME}[selected]`)?.setAttribute('pre-selected', '')
     }
 
-    onmousedown(event) {
-        const path = event.composedPath()
-        // don't block clicks in the search box
-        if (path.includes(this.search_box))
-            return
-        // mouse down remove the focus even if the target element is the current focused element
-        // this drives us to the impossibility of closing an opened component by clicking on its button [ button.opened => focusout (close) => click (toggle = open ) ]
-        // so to fix this, we cancel this default behaviour of mousedown
-        event.preventDefault()
-    }
-
     enter(event) {
         // avoid the the default "PointerEvent" action (will mess with button focus)
         event.preventDefault()
@@ -554,7 +552,7 @@ class SelectDropdown extends HTMLElement {
             return
 
         // open if closed
-        if (!this.button.classList.contains('opened') || !this.preselected_option)
+        if (! this.is_open || !this.preselected_option)
             return this.toggle_open(event)
 
         // set the current option if opened and preselected
@@ -627,7 +625,7 @@ class SelectDropdown extends HTMLElement {
 
         if (!internal) {
             // complete the current event listener execution then, focus
-            setTimeout(() => this.button.focus(), 1)
+            queueMicrotask(() => this.button.focus())
             this.close()
         }
     }
