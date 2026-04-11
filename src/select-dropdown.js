@@ -517,8 +517,13 @@ class SelectDropdown extends HTMLElement {
     close() {
         if (! this.is_open )
             return
+        // restore fltered options
+        this.search_input.value = ''
+        this.filter_options()
+        // close
         this.options.hidePopover()
         this.button.classList.remove('opened')
+        // update button
         this.update_button()
     }
 
