@@ -337,11 +337,11 @@ class SelectDropdown extends HTMLElement {
     }
 
     disconnectedCallback() {
-        // close our own popover if we are removed from the DOM while open, otherwise it
-        // survives in the document top-layer as a zombie (the popover API does not auto-close
-        // when the originating element is detached)
-        if (this.is_open)
-            this.options.hidePopover()
+        // close unconditionally: is_open relies on :popover-open which can return false
+        // after the element leaves the active tree even though the popover is still in the
+        // document top-layer. hidePopover throws if already-closed or disconnected — both
+        // are no-ops for our purposes.
+        try { this.options.hidePopover() } catch {}
     }
 
     static get observedAttributes() {
@@ -358,7 +358,7 @@ class SelectDropdown extends HTMLElement {
     }
 
     get is_open() {
-        return this.options.matches(':popover-open')
+        return this.options?.matches?.(':popover-open') ?? false
     }
 
     // ==[Search control]=======================================
