@@ -626,6 +626,7 @@ class SelectDropdown extends HTMLElement {
     clean_preselected() {
         const elements = this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}[pre-selected]`)
         Array.from(elements).forEach(element => element.removeAttribute('pre-selected'))
+        this.preselected_option = undefined
     }
 
     set_option(option, internal = false) {
