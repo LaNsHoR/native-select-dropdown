@@ -336,6 +336,14 @@ class SelectDropdown extends HTMLElement {
         this.filter_options()
     }
 
+    disconnectedCallback() {
+        // close our own popover if we are removed from the DOM while open, otherwise it
+        // survives in the document top-layer as a zombie (the popover API does not auto-close
+        // when the originating element is detached)
+        if (this.is_open)
+            this.options.hidePopover()
+    }
+
     static get observedAttributes() {
         // TODO: control dynamically attributes for search
         return ['disabled']
