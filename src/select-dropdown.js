@@ -568,7 +568,7 @@ class SelectDropdown extends HTMLElement {
     }
 
     enter(event) {
-        // avoid the the default "PointerEvent" action (will mess with button focus)
+        // prevent the default KeyboardEvent action (would mess with button focus)
         event.preventDefault()
 
         // if disabled, we do nothing
