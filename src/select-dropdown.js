@@ -324,6 +324,10 @@ class SelectDropdown extends HTMLElement {
         // add button-content select-option
         this.create_button_content()
 
+        // if a value was set before connection, sync the button visually now that button_content exists
+        if (this.selected_option)
+            this.update_button()
+
         //  add the default placeholder if we need to
         this.check_selected()
 
@@ -506,8 +510,12 @@ class SelectDropdown extends HTMLElement {
 
         if( this.is_open )
             this.options.hidePopover()
-        else
+        else {
             this.options.showPopover()
+            // if search is visible, focus it so the user can type immediately
+            if (! this.search_box.classList.contains('hidden'))
+                this.search_input.focus()
+        }
 
         this.button.classList.toggle('opened', this.is_open)
 
