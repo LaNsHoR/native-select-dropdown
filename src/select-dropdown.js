@@ -639,18 +639,23 @@ class SelectDropdown extends HTMLElement {
         this.update_button()
         this.clean_preselected()
 
-        // if the option we are selecting is a new one, we perform the change
-        if (this.querySelector(OPTION_TAG_NAME + '[selected]') != option) {
-            // setting selected attribute and dispatching a change event
+        // if the option we are selecting is a new one, mark it as selected
+        const changed = this.querySelector(OPTION_TAG_NAME + '[selected]') != option
+        if (changed) {
             option.setAttribute('pre-selected', '')
             option.setAttribute('selected', '')
-            !internal && this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
         }
 
         if (!internal) {
-            // complete the current event listener execution then, focus
-            queueMicrotask(() => this.button.focus())
+            // Synchronous, in order: focus the button, close the popover, then dispatch.
+            // This way consumers that take focus from a change handler (e.g. open a modal)
+            // can do so without the vendor stealing it back via a deferred refocus, which
+            // would prevent onfocusout from firing and leave the popover in an inconsistent
+            // open state in some flows (e.g. nested dropdowns inside an option).
+            this.button.focus()
             this.close()
+            if (changed)
+                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
         }
     }
 
