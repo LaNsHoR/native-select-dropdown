@@ -324,12 +324,24 @@ class SelectDropdown extends HTMLElement {
         // add button-content select-option
         this.create_button_content()
 
+        // if a value was set before connection, sync the button visually now that button_content exists
+        if (this.selected_option)
+            this.update_button()
+
         //  add the default placeholder if we need to
         this.check_selected()
 
         // display search box or not
         this.control_search_box_visibility()
         this.filter_options()
+    }
+
+    disconnectedCallback() {
+        // close unconditionally: is_open relies on :popover-open which can return false
+        // after the element leaves the active tree even though the popover is still in the
+        // document top-layer. hidePopover throws if already-closed or disconnected — both
+        // are no-ops for our purposes.
+        try { this.options.hidePopover() } catch {}
     }
 
     static get observedAttributes() {
@@ -346,7 +358,7 @@ class SelectDropdown extends HTMLElement {
     }
 
     get is_open() {
-        return this.options.matches(':popover-open')
+        return this.options?.matches?.(':popover-open') ?? false
     }
 
     // ==[Search control]=======================================
@@ -506,8 +518,12 @@ class SelectDropdown extends HTMLElement {
 
         if( this.is_open )
             this.options.hidePopover()
-        else
+        else {
             this.options.showPopover()
+            // if search is visible, focus it so the user can type immediately
+            if (! this.search_box.classList.contains('hidden'))
+                this.search_input.focus()
+        }
 
         this.button.classList.toggle('opened', this.is_open)
 
@@ -552,7 +568,7 @@ class SelectDropdown extends HTMLElement {
     }
 
     enter(event) {
-        // avoid the the default "PointerEvent" action (will mess with button focus)
+        // prevent the default KeyboardEvent action (would mess with button focus)
         event.preventDefault()
 
         // if disabled, we do nothing
@@ -610,6 +626,7 @@ class SelectDropdown extends HTMLElement {
     clean_preselected() {
         const elements = this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}[pre-selected]`)
         Array.from(elements).forEach(element => element.removeAttribute('pre-selected'))
+        this.preselected_option = undefined
     }
 
     set_option(option, internal = false) {
@@ -623,18 +640,23 @@ class SelectDropdown extends HTMLElement {
         this.update_button()
         this.clean_preselected()
 
-        // if the option we are selecting is a new one, we perform the change
-        if (this.querySelector(OPTION_TAG_NAME + '[selected]') != option) {
-            // setting selected attribute and dispatching a change event
+        // if the option we are selecting is a new one, mark it as selected
+        const changed = this.querySelector(OPTION_TAG_NAME + '[selected]') != option
+        if (changed) {
             option.setAttribute('pre-selected', '')
             option.setAttribute('selected', '')
-            !internal && this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
         }
 
         if (!internal) {
-            // complete the current event listener execution then, focus
-            queueMicrotask(() => this.button.focus())
+            // Synchronous, in order: focus the button, close the popover, then dispatch.
+            // This way consumers that take focus from a change handler (e.g. open a modal)
+            // can do so without the vendor stealing it back via a deferred refocus, which
+            // would prevent onfocusout from firing and leave the popover in an inconsistent
+            // open state in some flows (e.g. nested dropdowns inside an option).
+            this.button.focus()
             this.close()
+            if (changed)
+                this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
         }
     }
 
