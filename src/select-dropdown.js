@@ -457,7 +457,7 @@ class SelectDropdown extends HTMLElement {
         // restore previously hidden options
         Array.from(restore).forEach(option => option.removeAttribute('hidden-internal'))
 
-        // when opened, show the selected option only the list (button will show the placeholder)
+        // when opened, show the selected option only in the list (button will show the placeholder)
         if (this.is_open && show_selected_on == 'list') {
             const placeholder = this.querySelector(OPTION_TAG_NAME + '[placeholder]')
             this.button_content.innerHTML = placeholder?.getAttribute?.('label') || placeholder?.innerHTML || ''
@@ -478,7 +478,7 @@ class SelectDropdown extends HTMLElement {
             return
         }
 
-        // show the selected option in both, button and list
+        // show the selected option in both the button and the list
         this.button_content.innerHTML = this.selected_option?.getAttribute?.('label') || this.selected_option?.innerHTML || ''
         this.button_content.className = ''
         const option_classes = [... this.selected_option?.classList || []]
@@ -513,7 +513,7 @@ class SelectDropdown extends HTMLElement {
     close() {
         if (! this.is_open )
             return
-        // restore fltered options
+        // restore filtered options
         this.search_input.value = ''
         this.filter_options()
         // close
@@ -534,8 +534,8 @@ class SelectDropdown extends HTMLElement {
             return
 
         this.close()
-        // for nested dropdowns: parent lost the focus when nested child was focused, so it won't lost the focus again and won't be closed when the child lost its own
-        // so we throw a custom event for potential parent dropdowns
+        // for nested dropdowns: the parent already lost focus when the nested child was focused, so it won't lose focus again and won't be closed when the child loses its own
+        // so we dispatch a custom event for potential parent dropdowns
         this.dispatchEvent(new CustomEvent('childfocusout', { bubbles: true, composed: true, relatedTarget: event.relatedTarget }))
     }
 
@@ -660,9 +660,9 @@ class SelectDropdown extends HTMLElement {
         // lazy options_data flow: the matching <select-option> isn't in the DOM yet. Cache the value and look up label/className from data so update_button can render the button without materializing the whole list. When no entry matches, fall back to the placeholder entry (mirrors set options_data behaviour) so consumers that legitimately set value to null/undefined/"unknown" don't blank out the placeholder text that the dropdown was already displaying. Prefer entry.button_text over entry.label so consumers that use the inline-management pattern (label='' + button_text='real name', see tab_modal_list.get_options_with_inline_managment) get the right text on the button — matches the eager path which reads option.getAttribute('label') (= button_text attribute) first
         this._selected_value = value
         if (this._options_data) {
-            let entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == value : (o.value ?? '') == value))
+            let entry = this._options_data.find(option => option != null && (typeof option === 'string' ? option == value : (option.value ?? '') == value))
             if (!entry)
-                entry = this._options_data.find(o => o != null && typeof o !== 'string' && o.attributes?.placeholder != null)
+                entry = this._options_data.find(option => option != null && typeof option !== 'string' && option.attributes?.placeholder != null)
             if (entry != null) {
                 this._selected_label = typeof entry === 'string' ? entry : (entry.button_text ?? entry.label ?? entry.value ?? '')
                 this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
@@ -687,11 +687,11 @@ class SelectDropdown extends HTMLElement {
         if (this._options_data) {
             let entry = null
             if (this._selected_value != null) {
-                const v = this._selected_value
-                entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == v : (o.value ?? '') == v))
+                const value = this._selected_value
+                entry = this._options_data.find(option => option != null && (typeof option === 'string' ? option == value : (option.value ?? '') == value))
             }
             if (!entry)
-                entry = this._options_data.find(o => o != null && typeof o !== 'string' && o.attributes?.placeholder != null)
+                entry = this._options_data.find(option => option != null && typeof option !== 'string' && option.attributes?.placeholder != null)
             if (entry != null) {
                 this._selected_label = typeof entry === 'string' ? entry : (entry.button_text ?? entry.label ?? entry.value ?? '')
                 this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
@@ -743,7 +743,7 @@ class SelectDropdown extends HTMLElement {
     dematerialize_options() {
         if (!this._options_data || !this._materialized)
             return
-        // detach option.child nodes first so they can be reused on next materialize (e.g. inline-managment submenus built by get_options_with_inline_managment)
+        // detach option.child nodes first so they can be reused on next materialize (e.g. inline-management submenus built by get_options_with_inline_managment)
         const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}:not([button-content])`))
         options.forEach(option => option.remove())
         this._materialized = false
