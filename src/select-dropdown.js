@@ -176,11 +176,7 @@ class SelectDropdown extends HTMLElement {
                     cursor: pointer;
                     white-space: nowrap;
                     font-family: 'Roboto', sans-serif;
-                    width: -webkit-fill-available; 
-                }
-
-                ::slotted(select-option.auto-width) {
-                    width: min-content;
+                    width: -webkit-fill-available;
                 }
 
                 ::slotted(select-option:last-child) {
@@ -430,33 +426,6 @@ class SelectDropdown extends HTMLElement {
             this.create_button_content()
             this.update_button()
         }
-
-        this.update_arrow_size()
-    }
-
-    update_arrow_size() {
-        let max_width = 0
-        const arrow = this.querySelector(`:scope > ${ARROW_TAG_NAME}`)
-
-        if (!arrow) {
-            this.button_content.style.minWidth = `unset`
-            return
-        }
-
-        const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}:not([button-content])`))
-
-        // reset
-        options.forEach(option => (option.classList.add('auto-width')))
-
-        options.forEach(option => {
-            const box = option.getBoundingClientRect()
-            max_width = box.width > max_width ? box.width : max_width
-        })
-
-        // restore
-        options.forEach(option => (option.classList.remove('auto-width')))
-
-        this.button_content.style.minWidth = `${max_width}px`
     }
 
     check_selected() {
@@ -500,6 +469,15 @@ class SelectDropdown extends HTMLElement {
             this.selected_option?.setAttribute('hidden-internal', '')
         }
 
+        // lazy options_data flow: while the dropdown is closed the selected <select-option> may not exist in the DOM, so fall back to the cached label/className we stored in set_option (or via set value)
+        if (!this.selected_option && this._selected_label != null) {
+            this.button_content.innerHTML = this._selected_label
+            this.button_content.className = ''
+            if (this._selected_className)
+                this.button_content.classList.add(...this._selected_className.split(/\s+/).filter(Boolean))
+            return
+        }
+
         // show the selected option in both, button and list
         this.button_content.innerHTML = this.selected_option?.getAttribute?.('label') || this.selected_option?.innerHTML || ''
         this.button_content.className = ''
@@ -519,6 +497,8 @@ class SelectDropdown extends HTMLElement {
         if( this.is_open )
             this.options.hidePopover()
         else {
+            // lazy options_data flow: build <select-option> children on demand so consumers with N dropdowns × M options don't pay the cost upfront
+            this.materialize_options()
             this.options.showPopover()
             // if search is visible, focus it so the user can type immediately
             if (! this.search_box.classList.contains('hidden'))
@@ -541,6 +521,8 @@ class SelectDropdown extends HTMLElement {
         this.button.classList.remove('opened')
         // update button
         this.update_button()
+        // lazy options_data flow: discard the materialized options now that the dropdown is hidden; the selection state lives in _selected_value/_selected_label so update_button still works
+        this.dematerialize_options()
     }
 
     // ==[Events]===============================================
@@ -637,6 +619,10 @@ class SelectDropdown extends HTMLElement {
 
         // update the value and button content
         this.selected_option = option
+        // cache selection so the button can keep displaying the right label after dematerialize_options removes the DOM node (lazy options_data flow)
+        this._selected_value = option.value ?? option.getAttribute?.('value') ?? ''
+        this._selected_label = option.getAttribute?.('label') ?? option.innerHTML ?? ''
+        this._selected_className = option.className || ''
         this.update_button()
         this.clean_preselected()
 
@@ -661,7 +647,8 @@ class SelectDropdown extends HTMLElement {
     }
 
     get value() {
-        return this.selected_option?.value || ''
+        // lazy options_data flow: after dematerialize_options the DOM node is gone but _selected_value still holds the value cached in set_option, which is what consumers expect to read from their onchange handler
+        return this.selected_option?.value || this._selected_value || ''
     }
 
     set value(value) {
@@ -670,6 +657,92 @@ class SelectDropdown extends HTMLElement {
             if (option.value == value && !option.hasAttribute('button-content'))
                 return this.set_option(option, true)
         }
+        // lazy options_data flow: the matching <select-option> isn't in the DOM yet. Cache the value and look up label/className from data so update_button can render the button without materializing the whole list.
+        this._selected_value = value
+        if (this._options_data) {
+            const entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == value : (o.value ?? '') == value))
+            if (entry != null) {
+                this._selected_label = typeof entry === 'string' ? entry : (entry.label ?? entry.value ?? '')
+                this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
+            }
+            else {
+                this._selected_label = ''
+                this._selected_className = ''
+            }
+            this.selected_option = undefined
+            this.update_button()
+        }
+    }
+
+    // ==[Lazy options_data]====================================
+    // Consumers with many dropdowns sharing the same options (e.g. 33 event-listener rows × 2-3 selects) can call dropdown.options_data = [...] instead of appending <select-option> children. The list is materialized only when the dropdown opens and discarded on close, so the DOM only ever holds the options of the currently-open dropdown.
+
+    set options_data(data) {
+        this._options_data = Array.isArray(data) ? data : null
+        // already-open dropdowns: tear down any stale materialized list so the next render uses the new data
+        this.dematerialize_options()
+        // resolve the cached selection against the new data so the button label stays consistent
+        if (this._options_data && this._selected_value != null) {
+            const v = this._selected_value
+            const entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == v : (o.value ?? '') == v))
+            if (entry != null) {
+                this._selected_label = typeof entry === 'string' ? entry : (entry.label ?? entry.value ?? '')
+                this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
+                this.update_button()
+            }
+        }
+        // if the dropdown was open while data changed, rebuild now (rare, but keeps the contract intact)
+        if (this.is_open && this._options_data)
+            this.materialize_options()
+    }
+
+    materialize_options() {
+        if (!this._options_data || this._materialized)
+            return
+        this._options_data.forEach(option => {
+            if (option == null)
+                return
+            const node = document.createElement(OPTION_TAG_NAME)
+            if (typeof option === 'string') {
+                node.textContent = option
+                node.setAttribute('value', option)
+            }
+            else {
+                if (option.className)
+                    node.className = option.className
+                if (option.label != null)
+                    node.innerHTML = option.label
+                node.setAttribute('value', option.value ?? '')
+                if (option.button_text != null)
+                    node.setAttribute('label', option.button_text)
+                if (option.attributes) {
+                    for (const [k, v] of Object.entries(option.attributes))
+                        node.setAttribute(k, v)
+                }
+                if (option.child)
+                    node.appendChild(option.child)
+            }
+            const opt_value = typeof option === 'string' ? option : (option.value ?? '')
+            if (this._selected_value != null && opt_value == this._selected_value) {
+                node.setAttribute('selected', '')
+                // also assign synchronously so update_button later in toggle_open (before the MutationObserver microtask runs) can read selected_option directly
+                this.selected_option = node
+            }
+            this.appendChild(node)
+        })
+        this._materialized = true
+    }
+
+    dematerialize_options() {
+        if (!this._options_data || !this._materialized)
+            return
+        // detach option.child nodes first so they can be reused on next materialize (e.g. inline-managment submenus built by get_options_with_inline_managment)
+        const options = Array.from(this.querySelectorAll(`:scope > ${OPTION_TAG_NAME}:not([button-content])`))
+        options.forEach(option => option.remove())
+        this._materialized = false
+        // the DOM selected node is gone; selection state lives in _selected_value/_selected_label, used by update_button's lazy fallback
+        this.selected_option = undefined
+        this.preselected_option = undefined
     }
 }
 
