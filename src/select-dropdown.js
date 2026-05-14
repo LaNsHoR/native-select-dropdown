@@ -657,12 +657,14 @@ class SelectDropdown extends HTMLElement {
             if (option.value == value && !option.hasAttribute('button-content'))
                 return this.set_option(option, true)
         }
-        // lazy options_data flow: the matching <select-option> isn't in the DOM yet. Cache the value and look up label/className from data so update_button can render the button without materializing the whole list.
+        // lazy options_data flow: the matching <select-option> isn't in the DOM yet. Cache the value and look up label/className from data so update_button can render the button without materializing the whole list. When no entry matches, fall back to the placeholder entry (mirrors set options_data behaviour) so consumers that legitimately set value to null/undefined/"unknown" don't blank out the placeholder text that the dropdown was already displaying. Prefer entry.button_text over entry.label so consumers that use the inline-management pattern (label='' + button_text='real name', see tab_modal_list.get_options_with_inline_managment) get the right text on the button — matches the eager path which reads option.getAttribute('label') (= button_text attribute) first
         this._selected_value = value
         if (this._options_data) {
-            const entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == value : (o.value ?? '') == value))
+            let entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == value : (o.value ?? '') == value))
+            if (!entry)
+                entry = this._options_data.find(o => o != null && typeof o !== 'string' && o.attributes?.placeholder != null)
             if (entry != null) {
-                this._selected_label = typeof entry === 'string' ? entry : (entry.label ?? entry.value ?? '')
+                this._selected_label = typeof entry === 'string' ? entry : (entry.button_text ?? entry.label ?? entry.value ?? '')
                 this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
             }
             else {
@@ -691,7 +693,7 @@ class SelectDropdown extends HTMLElement {
             if (!entry)
                 entry = this._options_data.find(o => o != null && typeof o !== 'string' && o.attributes?.placeholder != null)
             if (entry != null) {
-                this._selected_label = typeof entry === 'string' ? entry : (entry.label ?? entry.value ?? '')
+                this._selected_label = typeof entry === 'string' ? entry : (entry.button_text ?? entry.label ?? entry.value ?? '')
                 this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
                 this.update_button()
             }
