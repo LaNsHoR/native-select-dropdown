@@ -681,10 +681,15 @@ class SelectDropdown extends HTMLElement {
         this._options_data = Array.isArray(data) ? data : null
         // already-open dropdowns: tear down any stale materialized list so the next render uses the new data
         this.dematerialize_options()
-        // resolve the cached selection against the new data so the button label stays consistent
-        if (this._options_data && this._selected_value != null) {
-            const v = this._selected_value
-            const entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == v : (o.value ?? '') == v))
+        // resolve the cached selection against the new data so the button label stays consistent. fall back to the placeholder entry (data attributes.placeholder) when there's no matching value — this mirrors the eager-API check_selected behaviour, which picks a [placeholder] <select-option> as the displayed selection whenever no [selected] option exists. Without this fallback, lazy consumers that rely on the placeholder pattern (e.g. a list with no chosen value showing a "select one..." prompt) end up with an empty button until the user opens the dropdown for the first time and the placeholder's connectedCallback triggers the DOM-based check_selected
+        if (this._options_data) {
+            let entry = null
+            if (this._selected_value != null) {
+                const v = this._selected_value
+                entry = this._options_data.find(o => o != null && (typeof o === 'string' ? o == v : (o.value ?? '') == v))
+            }
+            if (!entry)
+                entry = this._options_data.find(o => o != null && typeof o !== 'string' && o.attributes?.placeholder != null)
             if (entry != null) {
                 this._selected_label = typeof entry === 'string' ? entry : (entry.label ?? entry.value ?? '')
                 this._selected_className = typeof entry === 'string' ? '' : (entry.className || '')
