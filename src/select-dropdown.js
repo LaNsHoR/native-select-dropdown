@@ -500,6 +500,8 @@ class SelectDropdown extends HTMLElement {
             // lazy options_data flow: build <select-option> children on demand so consumers with N dropdowns × M options don't pay the cost upfront
             this.materialize_options()
             this.options.showPopover()
+            // refresh search box visibility synchronously here — the MutationObserver that normally drives control_search_box_visibility fires as a microtask AFTER toggle_open returns, so the check below would see the previous (dematerialized = 0 options = hidden) state and skip focusing the search input. for dropdowns with display-search="N" and N options, the user would see the search box appear but never receive focus on open
+            this.control_search_box_visibility()
             // if search is visible, focus it so the user can type immediately
             if (! this.search_box.classList.contains('hidden'))
                 this.search_input.focus()
