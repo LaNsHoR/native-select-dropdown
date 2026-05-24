@@ -161,12 +161,6 @@ class SelectDropdown extends HTMLElement {
                     left: anchor(left);
                     position: fixed;
                     margin: 0;
-                    position-try:
-                        top anchor(bottom),
-                        bottom anchor(top);
-                    position-try-fallbacks:
-                        left anchor(left),
-                        right anchor(right);
                 }
 
                 ::slotted(select-option) {
@@ -505,6 +499,7 @@ class SelectDropdown extends HTMLElement {
             // if search is visible, focus it so the user can type immediately
             if (! this.search_box.classList.contains('hidden'))
                 this.search_input.focus()
+            this.flip_to_fit()
         }
 
         this.button.classList.toggle('opened', this.is_open)
@@ -520,11 +515,34 @@ class SelectDropdown extends HTMLElement {
         this.filter_options()
         // close
         this.options.hidePopover()
+        // clear any flip applied on open so the next open re-evaluates from the default (below)
+        this.options.style.top = ''
+        this.options.style.bottom = ''
         this.button.classList.remove('opened')
         // update button
         this.update_button()
         // lazy options_data flow: discard the materialized options now that the dropdown is hidden; the selection state lives in _selected_value/_selected_label so update_button still works
         this.dematerialize_options()
+    }
+
+    // CSS anchor positioning's position-try doesn't flip the list in some embeddings (e.g. Electron), so flip
+    // in JS on open: when the open list would overflow below the viewport and there's more room above, pin its
+    // bottom to the button's top so it opens upward. position:fixed on a top-layer popover is viewport-relative,
+    // so window/getBoundingClientRect coordinates line up. Cleared again in close().
+    flip_to_fit() {
+        const button = this.button.getBoundingClientRect()
+        const room_below = window.innerHeight - button.bottom
+        const room_above = button.top
+        const flip = this.options.offsetHeight > room_below && room_above > room_below
+        if (flip) {
+            // open upward: pin the list's bottom to the button's top via anchor() — the same mechanism the default below position uses (top: anchor(bottom)), so it stays correct under scroll and within the anchor system
+            this.options.style.top = 'auto'
+            this.options.style.bottom = 'anchor(top)'
+        }
+        else {
+            this.options.style.top = ''
+            this.options.style.bottom = ''
+        }
     }
 
     // ==[Events]===============================================
